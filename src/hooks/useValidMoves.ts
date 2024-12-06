@@ -320,16 +320,19 @@ export const useValidMoves = (
         }
       }
 
+      // If it's the king moving, allow any safe square
+      if (piece.type === 'king') {
+        return moves.filter((move) => {
+          const simulatedBoard = pieces.map((row) => [...row]);
+          simulatedBoard[move.row][move.col] = piece;
+          simulatedBoard[row][col] = null;
+          return !isKingInCheck(simulatedBoard, piece.color);
+        });
+      }
+
       // If more than one piece is attacking, only king can move
       if (attackingPieces.length > 1) {
-        return piece.type === 'king'
-          ? moves.filter((move) => {
-              const simulatedBoard = pieces.map((row) => [...row]);
-              simulatedBoard[move.row][move.col] = piece;
-              simulatedBoard[row][col] = null;
-              return !isKingInCheck(simulatedBoard, piece.color);
-            })
-          : [];
+        return [];
       }
 
       // Filter moves to only those that block the check or capture the attacker
@@ -390,7 +393,6 @@ export const useValidMoves = (
     const kingPosition = findKing(board, kingColor);
     if (!kingPosition) return false;
 
-    // Check if any opponent piece can capture the king
     const opponentColor = kingColor === 'white' ? 'black' : 'white';
 
     // Check all squares for opponent pieces
@@ -398,37 +400,65 @@ export const useValidMoves = (
       for (let col = 0; col < 8; col++) {
         const piece = board[row][col];
         if (piece?.color === opponentColor) {
-          // Get moves based on piece type
-          let moves: Position[] = [];
-          switch (piece.type) {
-            case 'pawn':
-              moves = getPawnMoves(row, col, piece.color);
-              break;
-            case 'rook':
-              moves = getRookMoves(row, col, piece.color);
-              break;
-            case 'knight':
-              moves = getKnightMoves(row, col, piece.color);
-              break;
-            case 'bishop':
-              moves = getBishopMoves(row, col, piece.color);
-              break;
-            case 'queen':
-              moves = getQueenMoves(row, col, piece.color);
-              break;
-            case 'king':
-              moves = getKingMoves(row, col, piece.color);
-              break;
-          }
+          // For sliding pieces (bishop, rook, queen), check if there are blocking pieces
+          if (['bishop', 'rook', 'queen'].includes(piece.type)) {
+            const dx = Math.sign(kingPosition.col - col);
+            const dy = Math.sign(kingPosition.row - row);
 
-          // Check if any of these moves can capture the king
-          if (
-            moves.some(
-              (move) =>
-                move.row === kingPosition.row && move.col === kingPosition.col
-            )
-          ) {
-            return true;
+            // Check if the piece can move in this direction
+            const canMove =
+              piece.type === 'rook'
+                ? dx === 0 || dy === 0
+                : piece.type === 'bishop'
+                ? Math.abs(dx) === Math.abs(dy)
+                : true; // queen can move in any direction
+
+            if (canMove) {
+              let currentRow = row + dy;
+              let currentCol = col + dx;
+              let blocked = false;
+
+              while (
+                currentRow !== kingPosition.row ||
+                currentCol !== kingPosition.col
+              ) {
+                if (!isValidPosition(currentRow, currentCol)) {
+                  blocked = true;
+                  break;
+                }
+                if (board[currentRow][currentCol] !== null) {
+                  blocked = true;
+                  break;
+                }
+                currentRow += dy;
+                currentCol += dx;
+              }
+
+              if (!blocked) return true;
+            }
+          } else {
+            // For non-sliding pieces (pawn, knight, king), use the existing move calculation
+            let moves: Position[] = [];
+            switch (piece.type) {
+              case 'pawn':
+                moves = getPawnMoves(row, col, piece.color);
+                break;
+              case 'knight':
+                moves = getKnightMoves(row, col, piece.color);
+                break;
+              case 'king':
+                moves = getKingMoves(row, col, piece.color);
+                break;
+            }
+
+            if (
+              moves.some(
+                (move) =>
+                  move.row === kingPosition.row && move.col === kingPosition.col
+              )
+            ) {
+              return true;
+            }
           }
         }
       }
