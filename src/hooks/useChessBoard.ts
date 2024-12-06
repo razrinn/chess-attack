@@ -104,15 +104,18 @@ export const useChessBoard = () => {
   const handleMoveSelect = (index: number) => {
     if (index < -1 || index >= moves.length) return;
 
-    // Play move sound when going backwards
-    if (index < currentMoveIndex) {
+    // Play move sound when navigating moves
+    if (index !== currentMoveIndex) {
       playSound('move');
     }
 
     setCurrentMoveIndex(index);
+
     if (index === -1) {
       setPieces(getInitialBoard());
       setCurrentTurn('white');
+      setIsInCheck(null);
+      setIsGameOver(false);
       return;
     }
 
@@ -120,7 +123,6 @@ export const useChessBoard = () => {
     const newBoard = getInitialBoard();
     for (let i = 0; i <= index; i++) {
       const move = moves[i];
-      const isCapture = newBoard[move.to.row][move.to.col] !== null;
       const isCastling =
         move.piece.type === 'king' &&
         Math.abs(move.to.col - move.from.col) === 2;
@@ -139,39 +141,25 @@ export const useChessBoard = () => {
         newBoard[move.to.row][rookToCol] = newBoard[move.to.row][rookFromCol];
         newBoard[move.to.row][rookFromCol] = null;
       }
-
-      // Play sound for the last move in the sequence
-      if (i === index) {
-        if (isCastling) {
-          playSound('castle');
-        } else if (isCapture) {
-          playSound('capture');
-        } else {
-          playSound('move');
-        }
-
-        // Check if this move results in check or checkmate
-        const opponentColor = move.piece.color === 'white' ? 'black' : 'white';
-        const willBeInCheck = isKingInCheck(newBoard, opponentColor);
-
-        if (willBeInCheck) {
-          if (isCheckmate(newBoard, opponentColor)) {
-            playSound('gameEnd');
-            setIsGameOver(true);
-          } else {
-            playSound('check');
-          }
-          setIsInCheck(opponentColor);
-        } else {
-          setIsInCheck(null);
-        }
-      }
     }
 
     setPieces(newBoard);
+
     // Set turn to opposite of last played move
     const lastMove = moves[index];
     setCurrentTurn(lastMove.piece.color === 'white' ? 'black' : 'white');
+
+    // Update check status for the current position
+    const opponentColor = lastMove.piece.color === 'white' ? 'black' : 'white';
+    if (isKingInCheck(newBoard, opponentColor)) {
+      setIsInCheck(opponentColor);
+      // Only set game over if this is the latest move
+      if (isCheckmate(newBoard, opponentColor) && index === moves.length - 1) {
+        setIsGameOver(true);
+      }
+    } else {
+      setIsInCheck(null);
+    }
   };
 
   const makeMove = (
@@ -272,6 +260,9 @@ export const useChessBoard = () => {
   };
 
   const handleSquareClick = (row: number, col: number) => {
+    // Don't allow moves if game is over
+    if (isGameOver) return;
+
     if (selectedPiece) {
       if (selectedPiece.row === row && selectedPiece.col === col) {
         // Clicking the same piece deselects it
@@ -282,18 +273,10 @@ export const useChessBoard = () => {
       ) {
         // If the clicked square is a valid move (including captures), make the move
         makeMove(selectedPiece, { row, col });
-        setSelectedPiece(null);
-        setValidMoves([]);
-      } else if (
-        pieces[row][col]?.color ===
-        pieces[selectedPiece.row][selectedPiece.col]?.color
-      ) {
+      } else if (pieces[row][col]?.color === currentTurn) {
         // Clicking another piece of the same color changes selection to that piece
-        const piece = pieces[row][col];
-        if (piece && piece.color === currentTurn) {
-          setSelectedPiece({ row, col });
-          setValidMoves(getValidMoves(row, col));
-        }
+        setSelectedPiece({ row, col });
+        setValidMoves(getValidMoves(row, col));
       } else {
         // Clicking an invalid square deselects the current piece
         setSelectedPiece(null);
