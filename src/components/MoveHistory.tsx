@@ -27,32 +27,32 @@ export const MoveHistory: FC<MoveHistoryProps> = ({
   };
 
   return (
-    <div className='w-full sm:w-64 bg-white shadow-md rounded-lg p-4'>
+    <div className='w-full sm:w-64 bg-gray-800 shadow-md rounded-lg p-4 text-gray-200'>
       <h2 className='text-lg font-bold mb-4'>Move History</h2>
       <div className='flex gap-2 mb-4 flex-wrap'>
         <button
-          className='px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50'
+          className='px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 disabled:opacity-50 text-gray-200'
           onClick={() => onMoveSelect(-1)}
           disabled={currentMove === -1}
         >
           {'<<'}
         </button>
         <button
-          className='px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50'
+          className='px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 disabled:opacity-50 text-gray-200'
           onClick={() => onMoveSelect(currentMove - 1)}
           disabled={currentMove <= -1}
         >
           {'<'}
         </button>
         <button
-          className='px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50'
+          className='px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 disabled:opacity-50 text-gray-200'
           onClick={() => onMoveSelect(currentMove + 1)}
           disabled={currentMove >= moves.length - 1}
         >
           {'>'}
         </button>
         <button
-          className='px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50'
+          className='px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 disabled:opacity-50 text-gray-200'
           onClick={() => onMoveSelect(moves.length - 1)}
           disabled={currentMove === moves.length - 1 || moves.length === 0}
         >
@@ -63,8 +63,8 @@ export const MoveHistory: FC<MoveHistoryProps> = ({
         {moves.map((move, index) => (
           <div
             key={index}
-            className={`p-2 cursor-pointer hover:bg-gray-100 ${
-              index === currentMove ? 'bg-blue-100' : ''
+            className={`p-2 cursor-pointer hover:bg-gray-700 ${
+              index === currentMove ? 'bg-blue-900' : ''
             }`}
             onClick={() => onMoveSelect(index)}
           >

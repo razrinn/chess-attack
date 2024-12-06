@@ -56,7 +56,7 @@ export const GameStatus: FC<GameStatusProps> = ({ pieces, domination }) => {
   const dominationAdvantage = whiteDomination - blackDomination;
 
   return (
-    <div className='bg-white rounded-lg shadow-md p-3 mb-4'>
+    <div className='bg-gray-800 rounded-lg shadow-md p-3 mb-4 text-gray-200'>
       <h3 className='font-bold mb-2'>Game Status</h3>
       <div className='space-y-2 text-sm'>
         <div className='flex justify-between'>
@@ -67,14 +67,14 @@ export const GameStatus: FC<GameStatusProps> = ({ pieces, domination }) => {
           <span>Black material:</span>
           <span className='font-mono'>{blackValue}</span>
         </div>
-        <div className='flex justify-between font-bold border-t pt-1'>
+        <div className='flex justify-between font-bold border-t border-gray-700 pt-1'>
           <span>Material advantage:</span>
           <span
             className={
               advantage > 0
-                ? 'text-blue-600'
+                ? 'text-blue-400'
                 : advantage < 0
-                ? 'text-red-600'
+                ? 'text-red-400'
                 : ''
             }
           >
@@ -85,7 +85,7 @@ export const GameStatus: FC<GameStatusProps> = ({ pieces, domination }) => {
               : 'Even'}
           </span>
         </div>
-        <div className='border-t pt-2 mt-2'>
+        <div className='border-t border-gray-700 pt-2 mt-2'>
           <div className='flex justify-between'>
             <span>White squares:</span>
             <span className='font-mono'>{whiteDomination}</span>
