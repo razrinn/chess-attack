@@ -104,6 +104,10 @@ export const useChessBoard = () => {
   const handleMoveSelect = (index: number) => {
     if (index < -1 || index >= moves.length) return;
 
+    // Clear piece selection when navigating history
+    setSelectedPiece(null);
+    setValidMoves([]);
+
     setCurrentMoveIndex(index);
 
     if (index === -1) {
@@ -150,7 +154,6 @@ export const useChessBoard = () => {
     }
 
     setPieces(newBoard);
-
     // Set turn to opposite of last played move
     const lastMove = moves[index];
     setCurrentTurn(lastMove.piece.color === 'white' ? 'black' : 'white');
