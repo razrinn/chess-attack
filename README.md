@@ -39,6 +39,7 @@ This entire project, including all source code, components, and documentation, w
   - Move history with playback
   - Game status panel
   - Board coordinates (algebraic notation)
+  - Board flipping for different perspectives
   - Sound effects for moves, captures, and special events
 
 - **Visual Feedback**
