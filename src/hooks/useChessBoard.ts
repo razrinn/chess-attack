@@ -129,7 +129,7 @@ export const useChessBoard = () => {
       selectedPiece.row === row &&
       selectedPiece.col === col
     ) {
-      return 'ring-2 ring-yellow-400';
+      return 'border border-yellow-400';
     }
     return '';
   };
