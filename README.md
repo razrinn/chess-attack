@@ -109,6 +109,7 @@ src/
 
 ## 🎯 Future Enhancements
 
+- Legal move check
 - Checkmate detection
 - Stalemate detection
 - En passant moves
