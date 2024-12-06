@@ -23,10 +23,10 @@ export const Square: FC<SquareProps> = ({
       onDrop={onDrop}
       onDragOver={onDragOver}
     >
-      {isValidMove && (
-        <div className='absolute w-3 h-3 rounded-full bg-yellow-400/50' />
-      )}
       {children}
+      {isValidMove && (
+        <div className='absolute w-3 h-3 rounded-full bg-yellow-400/50 z-10' />
+      )}
     </div>
   );
 };

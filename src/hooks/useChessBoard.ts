@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useValidMoves } from './useValidMoves';
+import { useChessSound } from './useChessSound';
 
 type PieceType = 'pawn' | 'rook' | 'knight' | 'bishop' | 'queen' | 'king';
 type PieceColor = 'white' | 'black';
@@ -65,6 +66,7 @@ export const useChessBoard = () => {
   const [selectedPiece, setSelectedPiece] = useState<Position | null>(null);
   const [validMoves, setValidMoves] = useState<Position[]>([]);
   const { getValidMoves } = useValidMoves(pieces, null);
+  const { playSound } = useChessSound();
 
   const handleMoveSelect = (index: number) => {
     if (index < -1 || index >= moves.length) return;
@@ -100,8 +102,18 @@ export const useChessBoard = () => {
     if (!isValidMove) return;
 
     const newPieces = pieces.map((row) => [...row]);
+    const capturedPiece = newPieces[to.row][to.col];
     newPieces[to.row][to.col] = piece;
     newPieces[from.row][from.col] = null;
+
+    // Play appropriate sound based on move type
+    if (piece.type === 'king' && Math.abs(to.col - from.col) === 2) {
+      playSound('castle');
+    } else if (capturedPiece) {
+      playSound('capture');
+    } else {
+      playSound('move');
+    }
 
     // Handle castling
     if (piece.type === 'king' && Math.abs(to.col - from.col) === 2) {
@@ -135,13 +147,22 @@ export const useChessBoard = () => {
         // Clicking the same piece deselects it
         setSelectedPiece(null);
         setValidMoves([]);
-      } else if (pieces[row][col]) {
-        // Clicking another piece changes selection to that piece
+      } else if (
+        validMoves.some((move) => move.row === row && move.col === col)
+      ) {
+        // If the clicked square is a valid move (including captures), make the move
+        makeMove(selectedPiece, { row, col });
+        setSelectedPiece(null);
+        setValidMoves([]);
+      } else if (
+        pieces[row][col]?.color ===
+        pieces[selectedPiece.row][selectedPiece.col]?.color
+      ) {
+        // Clicking another piece of the same color changes selection to that piece
         setSelectedPiece({ row, col });
         setValidMoves(getValidMoves(row, col));
       } else {
-        // Clicking an empty square attempts to make a move
-        makeMove(selectedPiece, { row, col });
+        // Clicking an invalid square deselects the current piece
         setSelectedPiece(null);
         setValidMoves([]);
       }
