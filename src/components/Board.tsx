@@ -52,7 +52,7 @@ export const Board: FC = () => {
                         <Piece type={piece.type} color={piece.color} />
                       </div>
                     )}
-                    <div className='absolute bottom-0 right-0.5 text-[8px] sm:text-[10px] md:text-xs font-bold text-gray-600'>
+                    <div className='absolute bottom-0 right-0.5 text-[8px] font-bold text-gray-600'>
                       {getDominationText(domination[rowIndex][colIndex])}
                     </div>
                   </div>
