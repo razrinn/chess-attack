@@ -61,7 +61,7 @@ export const Square: FC<SquareProps> = ({
 
   return (
     <div
-      className={`w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16 flex items-center justify-center relative ${
+      className={`w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 flex items-center justify-center relative ${
         isBlack ? 'bg-gray-700' : 'bg-gray-500'
       }`}
       onDrop={onDrop}

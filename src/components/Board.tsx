@@ -46,7 +46,7 @@ export const Board: FC = () => {
           }
         />
       )}
-      <div className='flex gap-8'>
+      <div className='flex flex-col lg:flex-row gap-4'>
         <div className='flex flex-col gap-4'>
           <Legend isFlipped={isFlipped}>
             <div className='inline-block border-2 border-gray-800 touch-none select-none'>
@@ -105,11 +105,11 @@ export const Board: FC = () => {
             </div>
           </Legend>
         </div>
-        <div className='flex flex-col gap-4'>
-          <div className='flex gap-1'>
+        <div className='flex flex-col gap-4 w-full lg:w-auto'>
+          <div className='flex gap-2 justify-center lg:justify-start'>
             <button
               onClick={() => setIsFlipped((prev) => !prev)}
-              className='self-end p-1 px-2 bg-gray-700 rounded hover:bg-gray-600 text-gray-200 flex items-center gap-2'
+              className='p-1 px-2 bg-gray-700 rounded hover:bg-gray-600 text-gray-200 flex items-center gap-2'
             >
               🔄
             </button>

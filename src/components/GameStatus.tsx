@@ -76,8 +76,8 @@ export const GameStatus: FC<GameStatusProps> = ({
   };
 
   return (
-    <div className='bg-gray-800 rounded-lg shadow-md p-3 text-gray-200'>
-      <h3 className='font-bold mb-2'>Game Status</h3>
+    <div className='bg-gray-800 rounded-lg shadow-md p-3 text-gray-200 w-full lg:w-64'>
+      <h3 className='font-bold mb-2 text-center lg:text-left'>Game Status</h3>
       <div className='space-y-3'>
         {/* Overall advantage bar */}
         <div>

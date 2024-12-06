@@ -128,9 +128,11 @@ export const MoveHistory: FC<MoveHistoryProps> = ({
   }, [currentMove, moves.length, onMoveSelect]);
 
   return (
-    <div className='w-full sm:w-64 bg-gray-800 shadow-md rounded-lg p-4 text-gray-200'>
-      <h2 className='text-lg font-bold mb-4'>Move History</h2>
-      <div className='flex gap-2 mb-4 flex-wrap'>
+    <div className='w-full lg:w-64 bg-gray-800 shadow-md rounded-lg p-4 text-gray-200'>
+      <h2 className='text-lg font-bold mb-4 text-center lg:text-left'>
+        Move History
+      </h2>
+      <div className='flex gap-2 mb-4 justify-center lg:justify-start flex-wrap'>
         <button
           className='px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 disabled:opacity-50 text-gray-200'
           onClick={() => onMoveSelect(-1)}
@@ -162,7 +164,7 @@ export const MoveHistory: FC<MoveHistoryProps> = ({
       </div>
       <div
         ref={movesContainerRef}
-        className='max-h-48 overflow-y-auto scroll-smooth'
+        className='max-h-36 lg:max-h-48 overflow-y-auto scroll-smooth'
       >
         {movePairs.map(({ number, white, black }, index) => (
           <div key={number} className='py-1 flex gap-2'>
