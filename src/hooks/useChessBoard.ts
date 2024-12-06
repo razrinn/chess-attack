@@ -86,12 +86,24 @@ export const useChessBoard = () => {
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
   const [currentTurn, setCurrentTurn] = useState<'white' | 'black'>('white');
 
+  const resetGame = () => {
+    setPieces(getInitialBoard());
+    setMoves([]);
+    setCurrentMoveIndex(-1);
+    setSelectedPiece(null);
+    setValidMoves([]);
+    setIsInCheck(null);
+    setIsGameOver(false);
+    setCurrentTurn('white');
+  };
+
   const handleMoveSelect = (index: number) => {
     if (index < -1 || index >= moves.length) return;
 
     setCurrentMoveIndex(index);
     if (index === -1) {
       setPieces(getInitialBoard());
+      setCurrentTurn('white');
     } else {
       // Replay moves up to the selected index
       const newBoard = getInitialBoard();
@@ -104,6 +116,10 @@ export const useChessBoard = () => {
         newBoard[move.from.row][move.from.col] = null;
       }
       setPieces(newBoard);
+
+      // Set turn to opposite of last played move
+      const lastMove = moves[index];
+      setCurrentTurn(lastMove.piece.color === 'white' ? 'black' : 'white');
     }
   };
 
@@ -244,5 +260,6 @@ export const useChessBoard = () => {
     isInCheck,
     isGameOver,
     currentTurn,
+    resetGame,
   };
 };
