@@ -58,6 +58,18 @@ const getInitialBoard = () => {
   return initialBoard;
 };
 
+const simulateMove = (
+  from: Position,
+  to: Position,
+  currentPieces: (PieceState | null)[][]
+): (PieceState | null)[][] => {
+  const newPieces = currentPieces.map((row) => [...row]);
+  const piece = newPieces[from.row][from.col];
+  newPieces[to.row][to.col] = piece;
+  newPieces[from.row][from.col] = null;
+  return newPieces;
+};
+
 export const useChessBoard = () => {
   const [pieces, setPieces] =
     useState<(PieceState | null)[][]>(getInitialBoard);
@@ -72,6 +84,7 @@ export const useChessBoard = () => {
   const { playSound } = useChessSound();
   const [isInCheck, setIsInCheck] = useState<'white' | 'black' | null>(null);
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
+  const [currentTurn, setCurrentTurn] = useState<'white' | 'black'>('white');
 
   const handleMoveSelect = (index: number) => {
     if (index < -1 || index >= moves.length) return;
@@ -98,6 +111,9 @@ export const useChessBoard = () => {
     const piece = pieces[from.row][from.col];
     if (!piece) return;
 
+    // Check if it's the correct player's turn
+    if (piece.color !== currentTurn) return;
+
     // Check if the move is valid
     const validMoves = getValidMoves(from.row, from.col);
     const isValidMove = validMoves.some(
@@ -105,6 +121,12 @@ export const useChessBoard = () => {
     );
 
     if (!isValidMove) return;
+
+    // Simulate the move and check if it leaves own king in check
+    const simulatedBoard = simulateMove(from, to, pieces);
+    if (isKingInCheck(simulatedBoard, piece.color)) {
+      return; // Move would leave/put own king in check
+    }
 
     const newPieces = pieces.map((row) => [...row]);
     const capturedPiece = newPieces[to.row][to.col];
@@ -156,6 +178,8 @@ export const useChessBoard = () => {
     setCurrentMoveIndex(newMoves.length - 1);
     setSelectedPiece(null);
     setValidMoves([]);
+
+    setCurrentTurn(opponentColor);
   };
 
   const handleSquareClick = (row: number, col: number) => {
@@ -176,16 +200,23 @@ export const useChessBoard = () => {
         pieces[selectedPiece.row][selectedPiece.col]?.color
       ) {
         // Clicking another piece of the same color changes selection to that piece
-        setSelectedPiece({ row, col });
-        setValidMoves(getValidMoves(row, col));
+        const piece = pieces[row][col];
+        if (piece && piece.color === currentTurn) {
+          setSelectedPiece({ row, col });
+          setValidMoves(getValidMoves(row, col));
+        }
       } else {
         // Clicking an invalid square deselects the current piece
         setSelectedPiece(null);
         setValidMoves([]);
       }
-    } else if (pieces[row][col]) {
-      setSelectedPiece({ row, col });
-      setValidMoves(getValidMoves(row, col));
+    } else {
+      // Initial piece selection
+      const piece = pieces[row][col];
+      if (piece && piece.color === currentTurn) {
+        setSelectedPiece({ row, col });
+        setValidMoves(getValidMoves(row, col));
+      }
     }
   };
 
@@ -212,5 +243,6 @@ export const useChessBoard = () => {
     validMoves,
     isInCheck,
     isGameOver,
+    currentTurn,
   };
 };

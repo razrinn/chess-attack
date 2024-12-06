@@ -230,22 +230,142 @@ export const useValidMoves = (
     const piece = pieces[row][col];
     if (!piece) return [];
 
+    // Get all possible moves without considering check
+    let moves: Position[] = [];
     switch (piece.type) {
       case 'pawn':
-        return getPawnMoves(row, col, piece.color);
+        moves = getPawnMoves(row, col, piece.color);
+        break;
       case 'rook':
-        return getRookMoves(row, col, piece.color);
+        moves = getRookMoves(row, col, piece.color);
+        break;
       case 'knight':
-        return getKnightMoves(row, col, piece.color);
+        moves = getKnightMoves(row, col, piece.color);
+        break;
       case 'bishop':
-        return getBishopMoves(row, col, piece.color);
+        moves = getBishopMoves(row, col, piece.color);
+        break;
       case 'queen':
-        return getQueenMoves(row, col, piece.color);
+        moves = getQueenMoves(row, col, piece.color);
+        break;
       case 'king':
-        return getKingMoves(row, col, piece.color);
-      default:
-        return [];
+        moves = getKingMoves(row, col, piece.color);
+        break;
     }
+
+    const kingPosition = findKing(pieces, piece.color);
+    if (!kingPosition) return moves;
+
+    // If king is in check, only allow moves that block the check or capture the attacking piece
+    if (isKingInCheck(pieces, piece.color)) {
+      // Find the attacking piece(s)
+      const attackingPieces: Position[] = [];
+      const attackPaths: Position[][] = [];
+
+      const opponentColor = piece.color === 'white' ? 'black' : 'white';
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const attacker = pieces[r][c];
+          if (attacker?.color === opponentColor) {
+            let attackerMoves: Position[] = [];
+            switch (attacker.type) {
+              case 'pawn':
+                attackerMoves = getPawnMoves(r, c, attacker.color);
+                break;
+              case 'rook':
+                attackerMoves = getRookMoves(r, c, attacker.color);
+                break;
+              case 'knight':
+                attackerMoves = getKnightMoves(r, c, attacker.color);
+                break;
+              case 'bishop':
+                attackerMoves = getBishopMoves(r, c, attacker.color);
+                break;
+              case 'queen':
+                attackerMoves = getQueenMoves(r, c, attacker.color);
+                break;
+              case 'king':
+                attackerMoves = getKingMoves(r, c, attacker.color);
+                break;
+            }
+
+            if (
+              attackerMoves.some(
+                (move) =>
+                  move.row === kingPosition.row && move.col === kingPosition.col
+              )
+            ) {
+              attackingPieces.push({ row: r, col: c });
+
+              // Calculate attack path for sliding pieces
+              if (['bishop', 'rook', 'queen'].includes(attacker.type)) {
+                const path: Position[] = [];
+                const dx = Math.sign(kingPosition.col - c);
+                const dy = Math.sign(kingPosition.row - r);
+                let pathRow = r + dy;
+                let pathCol = c + dx;
+
+                while (
+                  pathRow !== kingPosition.row ||
+                  pathCol !== kingPosition.col
+                ) {
+                  path.push({ row: pathRow, col: pathCol });
+                  pathRow += dy;
+                  pathCol += dx;
+                }
+                attackPaths.push(path);
+              }
+            }
+          }
+        }
+      }
+
+      // If more than one piece is attacking, only king can move
+      if (attackingPieces.length > 1) {
+        return piece.type === 'king'
+          ? moves.filter((move) => {
+              const simulatedBoard = pieces.map((row) => [...row]);
+              simulatedBoard[move.row][move.col] = piece;
+              simulatedBoard[row][col] = null;
+              return !isKingInCheck(simulatedBoard, piece.color);
+            })
+          : [];
+      }
+
+      // Filter moves to only those that block the check or capture the attacker
+      return moves.filter((move) => {
+        // Can capture the attacking piece
+        if (
+          attackingPieces.some(
+            (attacker) => move.row === attacker.row && move.col === attacker.col
+          )
+        ) {
+          const simulatedBoard = pieces.map((row) => [...row]);
+          simulatedBoard[move.row][move.col] = piece;
+          simulatedBoard[row][col] = null;
+          return !isKingInCheck(simulatedBoard, piece.color);
+        }
+
+        // Can block the attack path
+        if (
+          attackPaths.some((path) =>
+            path.some((pos) => move.row === pos.row && move.col === pos.col)
+          )
+        ) {
+          const simulatedBoard = pieces.map((row) => [...row]);
+          simulatedBoard[move.row][move.col] = piece;
+          simulatedBoard[row][col] = null;
+          return !isKingInCheck(simulatedBoard, piece.color);
+        }
+
+        return false;
+      });
+    }
+
+    // Rest of the existing pin detection logic
+    // Reference to existing code:
+
+    return moves;
   };
 
   const findKing = (
