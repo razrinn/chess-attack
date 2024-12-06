@@ -104,11 +104,6 @@ export const useChessBoard = () => {
   const handleMoveSelect = (index: number) => {
     if (index < -1 || index >= moves.length) return;
 
-    // Play move sound when navigating moves
-    if (index !== currentMoveIndex) {
-      playSound('move');
-    }
-
     setCurrentMoveIndex(index);
 
     if (index === -1) {
@@ -126,6 +121,17 @@ export const useChessBoard = () => {
       const isCastling =
         move.piece.type === 'king' &&
         Math.abs(move.to.col - move.from.col) === 2;
+
+      // If this is the move we're navigating to, play the appropriate sound
+      if (i === index && index !== currentMoveIndex) {
+        if (isCastling) {
+          playSound('castle');
+        } else if (newBoard[move.to.row][move.to.col] !== null) {
+          playSound('capture');
+        } else {
+          playSound('move');
+        }
+      }
 
       newBoard[move.to.row][move.to.col] = {
         type: move.piece.type,
