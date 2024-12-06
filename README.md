@@ -6,6 +6,10 @@ This is a visualization of chess square domination using a fully functional ches
 
 This entire project, including all source code, components, and documentation, was generated through interactions with Anthropic's Claude Sonnet 3.5 using the Cline VSCode extension. The implementation includes sophisticated features like piece movement validation, square domination calculation, and drag-and-drop functionality, showcasing the potential of AI-assisted software development through direct IDE integration.
 
+## ♛ Assets
+
+- https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces
+
 ## ✨ Features
 
 - **Complete Chess Rules Implementation**
