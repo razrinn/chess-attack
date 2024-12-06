@@ -1,37 +1,35 @@
-import { FC } from 'react';
+import { FC, ReactNode } from 'react';
 
-export const Legend: FC = () => {
+interface LegendProps {
+  isFlipped: boolean;
+  children?: ReactNode;
+}
+export const Legend: FC<LegendProps> = ({ isFlipped, children }) => {
+  const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+  const ranks = ['8', '7', '6', '5', '4', '3', '2', '1'];
+
   return (
-    <div className='bg-gray-800 rounded-lg shadow-md p-3 text-sm text-gray-200'>
-      <h3 className='font-bold mb-2'>Square Control</h3>
-      <div className='md:flex gap-4'>
-        <div className='flex items-center gap-2'>
-          <div className='flex items-center gap-1'>
-            <div className='w-2 h-2 rounded-full bg-blue-400/70' />
-            <span className='text-[10px] font-semibold text-blue-400/70'>
-              2
-            </span>
+    <div className='flex'>
+      {/* Ranks legend (vertical) */}
+      <div className='flex flex-col justify-start mr-1 text-sm text-gray-400'>
+        {(isFlipped ? [...ranks].reverse() : ranks).map((rank) => (
+          <div key={rank} className='h-16 flex items-center'>
+            {rank}
           </div>
-          <span>White controls</span>
-        </div>
-        <div className='flex items-center gap-2'>
-          <div className='flex items-center gap-1'>
-            <div className='w-2 h-2 rounded-full bg-red-400/70' />
-            <span className='text-[10px] font-semibold text-red-400/70'>2</span>
-          </div>
-          <span>Black controls</span>
-        </div>
-        <div className='flex items-center gap-2'>
-          <div className='flex items-center gap-1'>
-            <div className='w-2 h-2 rounded-full bg-blue-400/70' />
-            <span className='text-[10px] font-semibold text-blue-400/70'>
-              2
-            </span>
-            <span className='text-gray-400'>·</span>
-            <div className='w-2 h-2 rounded-full bg-red-400/70' />
-            <span className='text-[10px] font-semibold text-red-400/70'>2</span>
-          </div>
-          <span>Contested square</span>
+        ))}
+      </div>
+
+      <div>
+        {/* Board content */}
+        {children}
+
+        {/* Files legend (horizontal) */}
+        <div className='flex gap-2 text-sm text-gray-400 mt-1'>
+          {(isFlipped ? [...files].reverse() : files).map((file) => (
+            <div key={file} className='w-14 text-center'>
+              {file}
+            </div>
+          ))}
         </div>
       </div>
     </div>

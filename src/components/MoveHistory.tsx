@@ -162,13 +162,13 @@ export const MoveHistory: FC<MoveHistoryProps> = ({
       </div>
       <div
         ref={movesContainerRef}
-        className='max-h-64 overflow-y-auto scroll-smooth'
+        className='max-h-48 overflow-y-auto scroll-smooth'
       >
         {movePairs.map(({ number, white, black }, index) => (
           <div key={number} className='py-1 flex gap-2'>
-            <span className='text-gray-400 w-6'>{number}.</span>
+            <span className='text-gray-400 w-6 text-sm'>{number}.</span>
             <span
-              className={`rounded w-20 text-center cursor-pointer hover:bg-gray-700 px-2 ${
+              className={`rounded w-20 text-center text-sm cursor-pointer hover:bg-gray-700 px-2 ${
                 index * 2 === currentMove ? 'bg-blue-900' : ''
               }`}
               onClick={() => onMoveSelect(index * 2)}
@@ -177,7 +177,7 @@ export const MoveHistory: FC<MoveHistoryProps> = ({
             </span>
             {black && (
               <span
-                className={`cursor-pointer w-20 text-center rounded hover:bg-gray-700 px-2 ${
+                className={`cursor-pointer text-sm w-20 text-center rounded hover:bg-gray-700 px-2 ${
                   index * 2 + 1 === currentMove ? 'bg-blue-900' : ''
                 }`}
                 onClick={() => onMoveSelect(index * 2 + 1)}

@@ -25,6 +25,8 @@ export const Board: FC = () => {
     resetGame,
     isInCheck,
     promotionPending,
+    isFlipped,
+    setIsFlipped,
   } = useChessBoard();
 
   const { domination, getDominationStyle } = useDomination(pieces);
@@ -44,50 +46,74 @@ export const Board: FC = () => {
           }
         />
       )}
-      <div className='flex flex-col sm:flex-row gap-4 items-start'>
-        <div>
-          <div className='inline-block border-2 border-gray-800 touch-none select-none'>
-            {pieces.map((row, rowIndex) => (
-              <div key={rowIndex} className='flex'>
-                {row.map((piece, colIndex) => (
-                  <Square
-                    key={`${rowIndex}-${colIndex}`}
-                    isBlack={(rowIndex + colIndex) % 2 === 1}
-                    onDrop={() => handleDrop(rowIndex, colIndex)}
-                    onDragOver={handleDragOver}
-                    isValidMove={validMoves.some(
-                      (move) => move.row === rowIndex && move.col === colIndex
+      <div className='flex gap-8'>
+        <div className='flex flex-col gap-4'>
+          <Legend isFlipped={isFlipped}>
+            <div className='inline-block border-2 border-gray-800 touch-none select-none'>
+              {(isFlipped ? [...pieces].reverse() : pieces).map(
+                (row, rowIndex) => (
+                  <div key={rowIndex} className='flex'>
+                    {(isFlipped ? [...row].reverse() : row).map(
+                      (piece, colIndex) => {
+                        const actualRow = isFlipped ? 7 - rowIndex : rowIndex;
+                        const actualCol = isFlipped ? 7 - colIndex : colIndex;
+
+                        return (
+                          <Square
+                            key={`${rowIndex}-${colIndex}`}
+                            isBlack={(rowIndex + colIndex) % 2 === 1}
+                            onDrop={() => handleDrop(actualRow, actualCol)}
+                            onDragOver={handleDragOver}
+                            isValidMove={validMoves.some(
+                              (move) =>
+                                move.row === actualRow && move.col === actualCol
+                            )}
+                            onClick={() =>
+                              handleSquareClick(actualRow, actualCol)
+                            }
+                            dominationCount={domination[actualRow][actualCol]}
+                          >
+                            <div
+                              className={`relative w-full h-full flex items-center justify-center cursor-pointer ${getDominationStyle(
+                                domination[actualRow][actualCol]
+                              )} ${getSquareHighlight(actualRow, actualCol)}`}
+                              onClick={() =>
+                                handleSquareClick(actualRow, actualCol)
+                              }
+                            >
+                              {piece && (
+                                <div
+                                  draggable
+                                  onDragStart={() =>
+                                    handleDragStart(actualRow, actualCol)
+                                  }
+                                >
+                                  <Piece
+                                    type={piece.type}
+                                    color={piece.color}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          </Square>
+                        );
+                      }
                     )}
-                    onClick={() => handleSquareClick(rowIndex, colIndex)}
-                    dominationCount={domination[rowIndex][colIndex]}
-                  >
-                    <div
-                      className={`relative w-full h-full flex items-center justify-center cursor-pointer ${getDominationStyle(
-                        domination[rowIndex][colIndex]
-                      )} ${getSquareHighlight(rowIndex, colIndex)}`}
-                      onClick={() => handleSquareClick(rowIndex, colIndex)}
-                    >
-                      {piece && (
-                        <div
-                          draggable
-                          onDragStart={() =>
-                            handleDragStart(rowIndex, colIndex)
-                          }
-                        >
-                          <Piece type={piece.type} color={piece.color} />
-                        </div>
-                      )}
-                    </div>
-                  </Square>
-                ))}
-              </div>
-            ))}
-          </div>
-          <div className='mt-4'>
-            <Legend />
-          </div>
+                  </div>
+                )
+              )}
+            </div>
+          </Legend>
         </div>
-        <div className='w-full sm:w-64'>
+        <div className='flex flex-col gap-4'>
+          <div className='flex gap-1'>
+            <button
+              onClick={() => setIsFlipped((prev) => !prev)}
+              className='self-end p-1 px-2 bg-gray-700 rounded hover:bg-gray-600 text-gray-200 flex items-center gap-2'
+            >
+              🔄
+            </button>
+          </div>
           <GameStatus
             pieces={pieces}
             domination={domination}

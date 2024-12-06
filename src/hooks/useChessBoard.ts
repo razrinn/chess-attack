@@ -90,6 +90,7 @@ export const useChessBoard = () => {
     from: Position;
     to: Position;
   } | null>(null);
+  const [isFlipped, setIsFlipped] = useState(false);
 
   const resetGame = () => {
     setPieces(getInitialBoard());
@@ -423,5 +424,7 @@ export const useChessBoard = () => {
     currentTurn,
     resetGame,
     promotionPending,
+    isFlipped,
+    setIsFlipped,
   };
 };
