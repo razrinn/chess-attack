@@ -1,4 +1,4 @@
-import { FC, useEffect, useRef } from 'react';
+import { FC, useEffect, useRef, useMemo } from 'react';
 
 interface Move {
   from: { row: number; col: number };
@@ -20,9 +20,6 @@ export const MoveHistory: FC<MoveHistoryProps> = ({
   currentMove,
   onMoveSelect,
 }) => {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const movesContainerRef = useRef<HTMLDivElement>(null);
-
   const getSquareName = (row: number, col: number) => {
     const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
     const ranks = ['8', '7', '6', '5', '4', '3', '2', '1'];
@@ -81,15 +78,20 @@ export const MoveHistory: FC<MoveHistoryProps> = ({
     return notation;
   };
 
-  // Group moves into pairs for display
-  const movePairs = [];
-  for (let i = 0; i < moves.length; i += 2) {
-    movePairs.push({
-      number: Math.floor(i / 2) + 1,
-      white: moves[i],
-      black: moves[i + 1],
-    });
-  }
+  // Group moves into pairs for display using useMemo
+  const movePairs = useMemo(() => {
+    const pairs = [];
+    for (let i = 0; i < moves.length; i += 2) {
+      pairs.push({
+        number: Math.floor(i / 2) + 1,
+        white: moves[i],
+        black: moves[i + 1],
+      });
+    }
+    return pairs;
+  }, [moves]); // Only recalculate when moves array changes
+
+  const movesContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (movesContainerRef.current && currentMove === moves.length - 1) {
@@ -97,6 +99,33 @@ export const MoveHistory: FC<MoveHistoryProps> = ({
         movesContainerRef.current.scrollHeight;
     }
   }, [moves.length, currentMove]);
+
+  // Add keyboard event listener
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.key === 'ArrowLeft') {
+        // Prevent scrolling
+        event.preventDefault();
+        if (currentMove > -1) {
+          onMoveSelect(currentMove - 1);
+        }
+      } else if (event.key === 'ArrowRight') {
+        // Prevent scrolling
+        event.preventDefault();
+        if (currentMove < moves.length - 1) {
+          onMoveSelect(currentMove + 1);
+        }
+      }
+    };
+
+    // Add event listener
+    window.addEventListener('keydown', handleKeyPress);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress);
+    };
+  }, [currentMove, moves.length, onMoveSelect]);
 
   return (
     <div className='w-full sm:w-64 bg-gray-800 shadow-md rounded-lg p-4 text-gray-200'>

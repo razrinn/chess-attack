@@ -8,7 +8,8 @@ This entire project, including all source code, components, and documentation, w
 
 ## ♛ Assets
 
-- https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces
+- Piece images: https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces
+- Game sound: https://www.chess.com/forum/view/general/chessboard-sound-files
 
 ## ✨ Features
 
