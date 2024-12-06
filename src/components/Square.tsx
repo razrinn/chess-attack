@@ -6,6 +6,7 @@ interface SquareProps {
   onDrop: (e: React.DragEvent) => void;
   onDragOver: (e: React.DragEvent) => void;
   isValidMove?: boolean;
+  onClick?: () => void;
 }
 
 export const Square: FC<SquareProps> = ({
@@ -14,6 +15,7 @@ export const Square: FC<SquareProps> = ({
   onDrop,
   onDragOver,
   isValidMove,
+  onClick,
 }) => {
   return (
     <div
@@ -22,10 +24,17 @@ export const Square: FC<SquareProps> = ({
       }`}
       onDrop={onDrop}
       onDragOver={onDragOver}
+      onClick={onClick}
     >
       {children}
       {isValidMove && (
-        <div className='absolute w-3 h-3 rounded-full bg-yellow-400/50 z-10' />
+        <div
+          className='absolute w-3 h-3 rounded-full bg-yellow-400/50 z-10 cursor-pointer'
+          onClick={(e) => {
+            e.stopPropagation();
+            onClick?.();
+          }}
+        />
       )}
     </div>
   );

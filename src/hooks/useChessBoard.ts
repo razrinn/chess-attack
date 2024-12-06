@@ -100,27 +100,74 @@ export const useChessBoard = () => {
   const handleMoveSelect = (index: number) => {
     if (index < -1 || index >= moves.length) return;
 
+    // Play move sound when going backwards
+    if (index < currentMoveIndex) {
+      playSound('move');
+    }
+
     setCurrentMoveIndex(index);
     if (index === -1) {
       setPieces(getInitialBoard());
       setCurrentTurn('white');
-    } else {
-      // Replay moves up to the selected index
-      const newBoard = getInitialBoard();
-      for (let i = 0; i <= index; i++) {
-        const move = moves[i];
-        newBoard[move.to.row][move.to.col] = {
-          type: move.piece.type,
-          color: move.piece.color,
-        };
-        newBoard[move.from.row][move.from.col] = null;
-      }
-      setPieces(newBoard);
-
-      // Set turn to opposite of last played move
-      const lastMove = moves[index];
-      setCurrentTurn(lastMove.piece.color === 'white' ? 'black' : 'white');
+      return;
     }
+
+    // Replay moves up to the selected index
+    const newBoard = getInitialBoard();
+    for (let i = 0; i <= index; i++) {
+      const move = moves[i];
+      const isCapture = newBoard[move.to.row][move.to.col] !== null;
+      const isCastling =
+        move.piece.type === 'king' &&
+        Math.abs(move.to.col - move.from.col) === 2;
+
+      newBoard[move.to.row][move.to.col] = {
+        type: move.piece.type,
+        color: move.piece.color,
+      };
+      newBoard[move.from.row][move.from.col] = null;
+
+      // Handle castling rook movement
+      if (isCastling) {
+        const isKingsideCastle = move.to.col > move.from.col;
+        const rookFromCol = isKingsideCastle ? 7 : 0;
+        const rookToCol = isKingsideCastle ? 5 : 3;
+        newBoard[move.to.row][rookToCol] = newBoard[move.to.row][rookFromCol];
+        newBoard[move.to.row][rookFromCol] = null;
+      }
+
+      // Play sound for the last move in the sequence
+      if (i === index) {
+        if (isCastling) {
+          playSound('castle');
+        } else if (isCapture) {
+          playSound('capture');
+        } else {
+          playSound('move');
+        }
+
+        // Check if this move results in check or checkmate
+        const opponentColor = move.piece.color === 'white' ? 'black' : 'white';
+        const willBeInCheck = isKingInCheck(newBoard, opponentColor);
+
+        if (willBeInCheck) {
+          if (isCheckmate(newBoard, opponentColor)) {
+            playSound('gameEnd');
+            setIsGameOver(true);
+          } else {
+            playSound('check');
+          }
+          setIsInCheck(opponentColor);
+        } else {
+          setIsInCheck(null);
+        }
+      }
+    }
+
+    setPieces(newBoard);
+    // Set turn to opposite of last played move
+    const lastMove = moves[index];
+    setCurrentTurn(lastMove.piece.color === 'white' ? 'black' : 'white');
   };
 
   const makeMove = (from: Position, to: Position) => {

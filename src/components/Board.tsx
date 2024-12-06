@@ -49,6 +49,7 @@ export const Board: FC = () => {
                     isValidMove={validMoves.some(
                       (move) => move.row === rowIndex && move.col === colIndex
                     )}
+                    onClick={() => handleSquareClick(rowIndex, colIndex)}
                   >
                     <div
                       className={`relative w-full h-full flex items-center justify-center cursor-pointer ${getDominationStyle(
