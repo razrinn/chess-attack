@@ -13,6 +13,8 @@ interface DominationCount {
 interface GameStatusProps {
   pieces: (PieceCount | null)[][];
   domination: DominationCount[][];
+  isInCheck: 'white' | 'black' | null;
+  isGameOver: boolean;
 }
 
 const PIECE_VALUES = {
@@ -24,7 +26,12 @@ const PIECE_VALUES = {
   king: 0, // Not counted in material advantage
 };
 
-export const GameStatus: FC<GameStatusProps> = ({ pieces, domination }) => {
+export const GameStatus: FC<GameStatusProps> = ({
+  pieces,
+  domination,
+  isInCheck,
+  isGameOver,
+}) => {
   const calculateMaterialValue = (color: 'white' | 'black') => {
     let value = 0;
     pieces.forEach((row) => {
@@ -113,6 +120,17 @@ export const GameStatus: FC<GameStatusProps> = ({ pieces, domination }) => {
             </span>
           </div>
         </div>
+        {isInCheck && (
+          <div
+            className={`text-${
+              isInCheck === 'white' ? 'blue' : 'red'
+            }-500 font-bold mt-2`}
+          >
+            {isInCheck.charAt(0).toUpperCase() + isInCheck.slice(1)} is in
+            check!
+            {isGameOver && ' - Checkmate!'}
+          </div>
+        )}
       </div>
     </div>
   );

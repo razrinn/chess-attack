@@ -65,8 +65,13 @@ export const useChessBoard = () => {
   const [currentMoveIndex, setCurrentMoveIndex] = useState(-1);
   const [selectedPiece, setSelectedPiece] = useState<Position | null>(null);
   const [validMoves, setValidMoves] = useState<Position[]>([]);
-  const { getValidMoves } = useValidMoves(pieces, null);
+  const { getValidMoves, isKingInCheck, isCheckmate } = useValidMoves(
+    pieces,
+    null
+  );
   const { playSound } = useChessSound();
+  const [isInCheck, setIsInCheck] = useState<'white' | 'black' | null>(null);
+  const [isGameOver, setIsGameOver] = useState<boolean>(false);
 
   const handleMoveSelect = (index: number) => {
     if (index < -1 || index >= moves.length) return;
@@ -106,8 +111,14 @@ export const useChessBoard = () => {
     newPieces[to.row][to.col] = piece;
     newPieces[from.row][from.col] = null;
 
-    // Play appropriate sound based on move type
+    // Handle castling
     if (piece.type === 'king' && Math.abs(to.col - from.col) === 2) {
+      const isKingsideCastle = to.col > from.col;
+      const rookFromCol = isKingsideCastle ? 7 : 0;
+      const rookToCol = isKingsideCastle ? 5 : 3;
+
+      newPieces[to.row][rookToCol] = newPieces[to.row][rookFromCol];
+      newPieces[to.row][rookFromCol] = null;
       playSound('castle');
     } else if (capturedPiece) {
       playSound('capture');
@@ -115,18 +126,7 @@ export const useChessBoard = () => {
       playSound('move');
     }
 
-    // Handle castling
-    if (piece.type === 'king' && Math.abs(to.col - from.col) === 2) {
-      const isKingsideCastle = to.col > from.col;
-      const rookFromCol = isKingsideCastle ? 7 : 0;
-      const rookToCol = isKingsideCastle ? 5 : 3;
-
-      // Move the rook
-      newPieces[to.row][rookToCol] = newPieces[to.row][rookFromCol];
-      newPieces[to.row][rookFromCol] = null;
-    }
-
-    // If we're not at the latest move, truncate the move history
+    // Update move history
     const newMoves = moves.slice(0, currentMoveIndex + 1);
     newMoves.push({
       from,
@@ -134,6 +134,23 @@ export const useChessBoard = () => {
       piece: { type: piece.type, color: piece.color },
     });
 
+    // Check for check condition before updating state
+    const opponentColor = piece.color === 'white' ? 'black' : 'white';
+    const willBeInCheck = isKingInCheck(newPieces, opponentColor);
+
+    // Play check sound and update state
+    if (willBeInCheck) {
+      playSound('check');
+      setIsInCheck(opponentColor);
+      if (isCheckmate(newPieces, opponentColor)) {
+        setIsGameOver(true);
+        playSound('gameEnd');
+      }
+    } else {
+      setIsInCheck(null);
+    }
+
+    // Update all state
     setPieces(newPieces);
     setMoves(newMoves);
     setCurrentMoveIndex(newMoves.length - 1);
@@ -193,5 +210,7 @@ export const useChessBoard = () => {
     handleSquareClick,
     getSquareHighlight,
     validMoves,
+    isInCheck,
+    isGameOver,
   };
 };

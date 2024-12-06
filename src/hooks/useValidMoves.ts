@@ -248,5 +248,107 @@ export const useValidMoves = (
     }
   };
 
-  return { getValidMoves };
+  const findKing = (
+    board: (PieceState | null)[][],
+    color: 'white' | 'black'
+  ): Position | null => {
+    for (let row = 0; row < 8; row++) {
+      for (let col = 0; col < 8; col++) {
+        const piece = board[row][col];
+        if (piece?.type === 'king' && piece.color === color) {
+          return { row, col };
+        }
+      }
+    }
+    return null;
+  };
+
+  const isKingInCheck = (
+    board: (PieceState | null)[][],
+    kingColor: 'white' | 'black'
+  ): boolean => {
+    const kingPosition = findKing(board, kingColor);
+    if (!kingPosition) return false;
+
+    // Check if any opponent piece can capture the king
+    const opponentColor = kingColor === 'white' ? 'black' : 'white';
+
+    // Check all squares for opponent pieces
+    for (let row = 0; row < 8; row++) {
+      for (let col = 0; col < 8; col++) {
+        const piece = board[row][col];
+        if (piece?.color === opponentColor) {
+          // Get moves based on piece type
+          let moves: Position[] = [];
+          switch (piece.type) {
+            case 'pawn':
+              moves = getPawnMoves(row, col, piece.color);
+              break;
+            case 'rook':
+              moves = getRookMoves(row, col, piece.color);
+              break;
+            case 'knight':
+              moves = getKnightMoves(row, col, piece.color);
+              break;
+            case 'bishop':
+              moves = getBishopMoves(row, col, piece.color);
+              break;
+            case 'queen':
+              moves = getQueenMoves(row, col, piece.color);
+              break;
+            case 'king':
+              moves = getKingMoves(row, col, piece.color);
+              break;
+          }
+
+          // Check if any of these moves can capture the king
+          if (
+            moves.some(
+              (move) =>
+                move.row === kingPosition.row && move.col === kingPosition.col
+            )
+          ) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  };
+
+  const isCheckmate = (
+    board: (PieceState | null)[][],
+    kingColor: 'white' | 'black'
+  ): boolean => {
+    // If the king is not in check, it's not checkmate
+    if (!isKingInCheck(board, kingColor)) return false;
+
+    // Try all possible moves for all pieces of the king's color
+    for (let row = 0; row < 8; row++) {
+      for (let col = 0; col < 8; col++) {
+        const piece = board[row][col];
+        if (piece?.color === kingColor) {
+          const moves = getValidMoves(row, col);
+
+          // Try each move to see if it gets out of check
+          for (const move of moves) {
+            // Create a temporary board to test the move
+            const tempBoard = board.map((row) => [...row]);
+            tempBoard[move.row][move.col] = tempBoard[row][col];
+            tempBoard[row][col] = null;
+
+            // If this move gets us out of check, it's not checkmate
+            if (!isKingInCheck(tempBoard, kingColor)) {
+              return false;
+            }
+          }
+        }
+      }
+    }
+
+    // If we've tried all moves and none get us out of check, it's checkmate
+    return true;
+  };
+
+  return { getValidMoves, isKingInCheck, isCheckmate };
 };
