@@ -6,7 +6,8 @@ interface Position {
 }
 
 export const useDragAndDrop = (
-  onMove: (from: Position, to: Position) => void
+  onMove: (from: Position, to: Position) => void,
+  validMoves: Position[]
 ) => {
   const [dragStart, setDragStart] = useState<Position | null>(null);
 
@@ -20,6 +21,8 @@ export const useDragAndDrop = (
 
   const handleDrop = (toRow: number, toCol: number) => {
     if (!dragStart) return;
+    if (!validMoves.some((move) => move.row === toRow && move.col === toCol))
+      return;
     onMove(dragStart, { row: toRow, col: toCol });
     setDragStart(null);
   };

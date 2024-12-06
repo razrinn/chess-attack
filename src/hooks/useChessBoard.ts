@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useValidMoves } from './useValidMoves';
 
 type PieceType = 'pawn' | 'rook' | 'knight' | 'bishop' | 'queen' | 'king';
 type PieceColor = 'white' | 'black';
@@ -62,6 +63,8 @@ export const useChessBoard = () => {
   const [moves, setMoves] = useState<Move[]>([]);
   const [currentMoveIndex, setCurrentMoveIndex] = useState(-1);
   const [selectedPiece, setSelectedPiece] = useState<Position | null>(null);
+  const [validMoves, setValidMoves] = useState<Position[]>([]);
+  const { getValidMoves } = useValidMoves(pieces, null);
 
   const handleMoveSelect = (index: number) => {
     if (index < -1 || index >= moves.length) return;
@@ -88,6 +91,14 @@ export const useChessBoard = () => {
     const piece = pieces[from.row][from.col];
     if (!piece) return;
 
+    // Check if the move is valid
+    const validMoves = getValidMoves(from.row, from.col);
+    const isValidMove = validMoves.some(
+      (move) => move.row === to.row && move.col === to.col
+    );
+
+    if (!isValidMove) return;
+
     const newPieces = pieces.map((row) => [...row]);
     newPieces[to.row][to.col] = piece;
     newPieces[from.row][from.col] = null;
@@ -103,6 +114,8 @@ export const useChessBoard = () => {
     setPieces(newPieces);
     setMoves(newMoves);
     setCurrentMoveIndex(newMoves.length - 1);
+    setSelectedPiece(null);
+    setValidMoves([]);
   };
 
   const handleSquareClick = (row: number, col: number) => {
@@ -110,16 +123,20 @@ export const useChessBoard = () => {
       if (selectedPiece.row === row && selectedPiece.col === col) {
         // Clicking the same piece deselects it
         setSelectedPiece(null);
+        setValidMoves([]);
       } else if (pieces[row][col]) {
         // Clicking another piece changes selection to that piece
         setSelectedPiece({ row, col });
+        setValidMoves(getValidMoves(row, col));
       } else {
         // Clicking an empty square attempts to make a move
         makeMove(selectedPiece, { row, col });
         setSelectedPiece(null);
+        setValidMoves([]);
       }
     } else if (pieces[row][col]) {
       setSelectedPiece({ row, col });
+      setValidMoves(getValidMoves(row, col));
     }
   };
 
@@ -143,5 +160,6 @@ export const useChessBoard = () => {
     makeMove,
     handleSquareClick,
     getSquareHighlight,
+    validMoves,
   };
 };

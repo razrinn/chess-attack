@@ -17,13 +17,16 @@ export const Board: FC = () => {
     makeMove,
     handleSquareClick,
     getSquareHighlight,
+    validMoves,
   } = useChessBoard();
 
   const { domination, getDominationStyle, getDominationText } =
     useDomination(pieces);
 
-  const { handleDragStart, handleDragOver, handleDrop } =
-    useDragAndDrop(makeMove);
+  const { handleDragStart, handleDragOver, handleDrop } = useDragAndDrop(
+    makeMove,
+    validMoves
+  );
 
   return (
     <div className='flex flex-col sm:flex-row gap-4 items-start'>
@@ -37,6 +40,9 @@ export const Board: FC = () => {
                   isBlack={(rowIndex + colIndex) % 2 === 1}
                   onDrop={() => handleDrop(rowIndex, colIndex)}
                   onDragOver={handleDragOver}
+                  isValidMove={validMoves.some(
+                    (move) => move.row === rowIndex && move.col === colIndex
+                  )}
                 >
                   <div
                     className={`relative w-full h-full flex items-center justify-center cursor-pointer ${getDominationStyle(
