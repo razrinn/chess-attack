@@ -187,6 +187,7 @@ export const useValidMoves = (
       [1, 1],
     ];
 
+    // Regular king moves
     directions.forEach(([dRow, dCol]) => {
       const newRow = row + dRow;
       const newCol = col + dCol;
@@ -199,7 +200,28 @@ export const useValidMoves = (
       }
     });
 
-    // TODO: Add castling logic here
+    // Castling logic
+    const isKingStartPosition =
+      color === 'white' ? row === 7 && col === 4 : row === 0 && col === 4;
+    if (isKingStartPosition) {
+      // Check kingside castling
+      if (
+        !pieces[row][5] &&
+        !pieces[row][6] &&
+        pieces[row][7]?.type === 'rook'
+      ) {
+        moves.push({ row, col: col + 2 });
+      }
+      // Check queenside castling
+      if (
+        !pieces[row][3] &&
+        !pieces[row][2] &&
+        !pieces[row][1] &&
+        pieces[row][0]?.type === 'rook'
+      ) {
+        moves.push({ row, col: col - 2 });
+      }
+    }
 
     return moves;
   };

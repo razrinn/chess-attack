@@ -103,6 +103,17 @@ export const useChessBoard = () => {
     newPieces[to.row][to.col] = piece;
     newPieces[from.row][from.col] = null;
 
+    // Handle castling
+    if (piece.type === 'king' && Math.abs(to.col - from.col) === 2) {
+      const isKingsideCastle = to.col > from.col;
+      const rookFromCol = isKingsideCastle ? 7 : 0;
+      const rookToCol = isKingsideCastle ? 5 : 3;
+
+      // Move the rook
+      newPieces[to.row][rookToCol] = newPieces[to.row][rookFromCol];
+      newPieces[to.row][rookFromCol] = null;
+    }
+
     // If we're not at the latest move, truncate the move history
     const newMoves = moves.slice(0, currentMoveIndex + 1);
     newMoves.push({
