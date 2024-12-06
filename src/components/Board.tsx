@@ -27,8 +27,7 @@ export const Board: FC = () => {
     promotionPending,
   } = useChessBoard();
 
-  const { domination, getDominationStyle, getDominationText } =
-    useDomination(pieces);
+  const { domination, getDominationStyle } = useDomination(pieces);
 
   const { handleDragStart, handleDragOver, handleDrop } = useDragAndDrop(
     makeMove,
@@ -60,6 +59,7 @@ export const Board: FC = () => {
                       (move) => move.row === rowIndex && move.col === colIndex
                     )}
                     onClick={() => handleSquareClick(rowIndex, colIndex)}
+                    dominationCount={domination[rowIndex][colIndex]}
                   >
                     <div
                       className={`relative w-full h-full flex items-center justify-center cursor-pointer ${getDominationStyle(
@@ -77,9 +77,6 @@ export const Board: FC = () => {
                           <Piece type={piece.type} color={piece.color} />
                         </div>
                       )}
-                      <div className='absolute bottom-0 right-0.5 text-[8px] font-bold text-gray-600'>
-                        {getDominationText(domination[rowIndex][colIndex])}
-                      </div>
                     </div>
                   </Square>
                 ))}

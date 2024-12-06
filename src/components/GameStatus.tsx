@@ -26,6 +26,9 @@ const PIECE_VALUES = {
   king: 0, // Not counted in material advantage
 };
 
+// Weight for square control in the overall advantage calculation
+const SQUARE_CONTROL_WEIGHT = 0.1;
+
 export const GameStatus: FC<GameStatusProps> = ({
   pieces,
   domination,
@@ -56,75 +59,112 @@ export const GameStatus: FC<GameStatusProps> = ({
 
   const whiteValue = calculateMaterialValue('white');
   const blackValue = calculateMaterialValue('black');
-  const advantage = whiteValue - blackValue;
-
   const whiteDomination = calculateTotalDomination('white');
   const blackDomination = calculateTotalDomination('black');
+
+  // Calculate advantages (positive means White is ahead, negative means Black is ahead)
+  const materialAdvantage = whiteValue - blackValue;
   const dominationAdvantage = whiteDomination - blackDomination;
+  const overallAdvantage =
+    materialAdvantage + dominationAdvantage * SQUARE_CONTROL_WEIGHT;
+
+  // Helper function to format advantage text with proper sign
+  const formatAdvantage = (value: number) => {
+    if (value === 0) return '0.0';
+    const sign = value > 0 ? '+' : '';
+    return `${sign}${value.toFixed(1)}`;
+  };
 
   return (
     <div className='bg-gray-800 rounded-lg shadow-md p-3 mb-4 text-gray-200'>
       <h3 className='font-bold mb-2'>Game Status</h3>
-      <div className='space-y-2 text-sm'>
-        <div className='flex justify-between'>
-          <span>White material:</span>
-          <span className='font-mono'>{whiteValue}</span>
-        </div>
-        <div className='flex justify-between'>
-          <span>Black material:</span>
-          <span className='font-mono'>{blackValue}</span>
-        </div>
-        <div className='flex justify-between font-bold border-t border-gray-700 pt-1'>
-          <span>Material advantage:</span>
-          <span
-            className={
-              advantage > 0
-                ? 'text-blue-400'
-                : advantage < 0
-                ? 'text-red-400'
-                : ''
-            }
-          >
-            {advantage > 0
-              ? `+${advantage} White`
-              : advantage < 0
-              ? `${advantage} Black`
-              : 'Even'}
-          </span>
-        </div>
-        <div className='border-t border-gray-700 pt-2 mt-2'>
-          <div className='flex justify-between'>
-            <span>White squares:</span>
-            <span className='font-mono'>{whiteDomination}</span>
-          </div>
-          <div className='flex justify-between'>
-            <span>Black squares:</span>
-            <span className='font-mono'>{blackDomination}</span>
-          </div>
-          <div className='flex justify-between font-bold border-t pt-1'>
-            <span>Square control:</span>
+      <div className='space-y-3'>
+        {/* Overall advantage bar */}
+        <div>
+          <div className='flex justify-between text-sm mb-1'>
+            <span>Advantage</span>
             <span
               className={
-                dominationAdvantage > 0
-                  ? 'text-blue-600'
-                  : dominationAdvantage < 0
-                  ? 'text-red-600'
-                  : ''
+                overallAdvantage > 0
+                  ? 'text-blue-400'
+                  : overallAdvantage < 0
+                  ? 'text-red-400'
+                  : 'text-gray-400'
               }
             >
-              {dominationAdvantage > 0
-                ? `+${dominationAdvantage} White`
-                : dominationAdvantage < 0
-                ? `${dominationAdvantage} Black`
+              {overallAdvantage > 0
+                ? 'White'
+                : overallAdvantage < 0
+                ? 'Black'
                 : 'Even'}
             </span>
           </div>
+          <div className='h-2 bg-gray-700 rounded overflow-hidden'>
+            <div
+              className={`h-full transition-all duration-300 ${
+                overallAdvantage > 0
+                  ? 'bg-blue-500 ml-1/2'
+                  : 'bg-red-500 mr-1/2'
+              }`}
+              style={{
+                width: `${Math.min(Math.abs(overallAdvantage) * 5, 50)}%`,
+              }}
+            />
+          </div>
         </div>
+
+        {/* Detailed stats */}
+        <div className='grid grid-cols-3 gap-2 text-sm'>
+          <div className='text-center'>
+            <div
+              className={`font-semibold ${
+                materialAdvantage > 0
+                  ? 'text-blue-400'
+                  : materialAdvantage < 0
+                  ? 'text-red-400'
+                  : 'text-gray-400'
+              }`}
+            >
+              {formatAdvantage(materialAdvantage)}
+            </div>
+            <div className='text-xs text-gray-400'>Material</div>
+          </div>
+          <div className='text-center'>
+            <div
+              className={`font-semibold ${
+                dominationAdvantage > 0
+                  ? 'text-blue-400'
+                  : dominationAdvantage < 0
+                  ? 'text-red-400'
+                  : 'text-gray-400'
+              }`}
+            >
+              {formatAdvantage(dominationAdvantage)}
+            </div>
+            <div className='text-xs text-gray-400'>Control</div>
+          </div>
+          <div className='text-center'>
+            <div
+              className={`font-semibold ${
+                overallAdvantage > 0
+                  ? 'text-blue-400'
+                  : overallAdvantage < 0
+                  ? 'text-red-400'
+                  : 'text-gray-400'
+              }`}
+            >
+              {formatAdvantage(overallAdvantage)}
+            </div>
+            <div className='text-xs text-gray-400'>Overall</div>
+          </div>
+        </div>
+
+        {/* Check/Checkmate status */}
         {isInCheck && (
           <div
             className={`text-${
               isInCheck === 'white' ? 'blue' : 'red'
-            }-500 font-bold mt-2`}
+            }-500 font-bold mt-2 text-center`}
           >
             {isInCheck.charAt(0).toUpperCase() + isInCheck.slice(1)} is in
             check!

@@ -7,6 +7,10 @@ interface SquareProps {
   onDragOver: (e: React.DragEvent) => void;
   isValidMove?: boolean;
   onClick?: () => void;
+  dominationCount?: {
+    white: number;
+    black: number;
+  };
 }
 
 export const Square: FC<SquareProps> = ({
@@ -16,7 +20,45 @@ export const Square: FC<SquareProps> = ({
   onDragOver,
   isValidMove,
   onClick,
+  dominationCount,
 }) => {
+  const getDominationIndicator = () => {
+    if (
+      !dominationCount ||
+      (dominationCount.white === 0 && dominationCount.black === 0)
+    ) {
+      return null;
+    }
+
+    // Determine which color dominates
+    const whiteDominates = dominationCount.white > dominationCount.black;
+    const blackDominates = dominationCount.black > dominationCount.white;
+    const isContested = dominationCount.white === dominationCount.black;
+
+    return (
+      <div className='absolute bottom-0.5 right-0.5 flex items-center gap-0.5'>
+        {/* Show dominating color first */}
+        {(whiteDominates || isContested) && (
+          <div className='flex items-center'>
+            <div className='w-1.5 h-1.5 rounded-full bg-blue-400/70' />
+            <span className='text-[8px] font-semibold text-blue-400/70 ml-0.5'>
+              {dominationCount.white}
+            </span>
+          </div>
+        )}
+        {isContested && <span className='text-[8px] text-gray-400'>·</span>}
+        {(blackDominates || isContested) && (
+          <div className='flex items-center'>
+            <div className='w-1.5 h-1.5 rounded-full bg-red-400/70' />
+            <span className='text-[8px] font-semibold text-red-400/70 ml-0.5'>
+              {dominationCount.black}
+            </span>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div
       className={`w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16 flex items-center justify-center relative ${
@@ -36,6 +78,7 @@ export const Square: FC<SquareProps> = ({
           }}
         />
       )}
+      {getDominationIndicator()}
     </div>
   );
 };
