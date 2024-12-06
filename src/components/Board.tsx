@@ -8,6 +8,7 @@ import { useChessBoard } from '../hooks/useChessBoard';
 import { useDomination } from '../hooks/useDomination';
 import { useDragAndDrop } from '../hooks/useDragAndDrop';
 import { WinningModal } from './WinningModal';
+import { PromotionModal } from './PromotionModal';
 
 export const Board: FC = () => {
   const {
@@ -23,6 +24,7 @@ export const Board: FC = () => {
     currentTurn,
     resetGame,
     isInCheck,
+    promotionPending,
   } = useChessBoard();
 
   const { domination, getDominationStyle, getDominationText } =
@@ -35,6 +37,14 @@ export const Board: FC = () => {
 
   return (
     <>
+      {promotionPending && (
+        <PromotionModal
+          color={currentTurn}
+          onSelect={(piece) =>
+            makeMove(promotionPending.from, promotionPending.to, piece)
+          }
+        />
+      )}
       <div className='flex flex-col sm:flex-row gap-4 items-start'>
         <div>
           <div className='inline-block border-2 border-gray-800 touch-none select-none'>

@@ -85,6 +85,10 @@ export const useChessBoard = () => {
   const [isInCheck, setIsInCheck] = useState<'white' | 'black' | null>(null);
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
   const [currentTurn, setCurrentTurn] = useState<'white' | 'black'>('white');
+  const [promotionPending, setPromotionPending] = useState<{
+    from: Position;
+    to: Position;
+  } | null>(null);
 
   const resetGame = () => {
     setPieces(getInitialBoard());
@@ -170,7 +174,11 @@ export const useChessBoard = () => {
     setCurrentTurn(lastMove.piece.color === 'white' ? 'black' : 'white');
   };
 
-  const makeMove = (from: Position, to: Position) => {
+  const makeMove = (
+    from: Position,
+    to: Position,
+    promotionPiece?: PieceType
+  ) => {
     const piece = pieces[from.row][from.col];
     if (!piece) return;
 
@@ -185,6 +193,14 @@ export const useChessBoard = () => {
 
     if (!isValidMove) return;
 
+    // Check for pawn promotion
+    const isPromotion = piece.type === 'pawn' && (to.row === 0 || to.row === 7);
+
+    if (isPromotion && !promotionPiece) {
+      setPromotionPending({ from, to });
+      return;
+    }
+
     // Simulate the move and check if it leaves own king in check
     const simulatedBoard = simulateMove(from, to, pieces);
     if (isKingInCheck(simulatedBoard, piece.color)) {
@@ -193,7 +209,11 @@ export const useChessBoard = () => {
 
     const newPieces = pieces.map((row) => [...row]);
     const capturedPiece = newPieces[to.row][to.col];
-    newPieces[to.row][to.col] = piece;
+
+    // Set the piece, handling promotion if necessary
+    newPieces[to.row][to.col] = isPromotion
+      ? { type: promotionPiece!, color: piece.color }
+      : piece;
     newPieces[from.row][from.col] = null;
 
     // Handle castling
@@ -207,6 +227,8 @@ export const useChessBoard = () => {
       playSound('castle');
     } else if (capturedPiece) {
       playSound('capture');
+    } else if (isPromotion) {
+      playSound('promote');
     } else {
       playSound('move');
     }
@@ -216,7 +238,10 @@ export const useChessBoard = () => {
     newMoves.push({
       from,
       to,
-      piece: { type: piece.type, color: piece.color },
+      piece: {
+        type: isPromotion ? promotionPiece! : piece.type,
+        color: piece.color,
+      },
     });
 
     // Check for check condition before updating state
@@ -241,6 +266,7 @@ export const useChessBoard = () => {
     setCurrentMoveIndex(newMoves.length - 1);
     setSelectedPiece(null);
     setValidMoves([]);
+    setPromotionPending(null);
 
     setCurrentTurn(opponentColor);
   };
@@ -308,5 +334,6 @@ export const useChessBoard = () => {
     isGameOver,
     currentTurn,
     resetGame,
+    promotionPending,
   };
 };
