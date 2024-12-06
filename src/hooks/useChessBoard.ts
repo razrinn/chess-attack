@@ -100,6 +100,7 @@ export const useChessBoard = () => {
     setIsInCheck(null);
     setIsGameOver(false);
     setCurrentTurn('white');
+    setLastPawnMove(null);
   };
 
   const handleMoveSelect = (index: number) => {
@@ -109,6 +110,48 @@ export const useChessBoard = () => {
     setSelectedPiece(null);
     setValidMoves([]);
 
+    // Play move sound when going back to start position
+    if (index === -1 && currentMoveIndex !== -1) {
+      playSound('move');
+    }
+
+    // Play appropriate sound when navigating to a new move
+    if (index !== currentMoveIndex && index >= 0) {
+      const move = moves[index];
+      const prevMove = index > 0 ? moves[index - 1] : null;
+
+      const isEnPassant =
+        move.piece.type === 'pawn' &&
+        Math.abs(move.from.col - move.to.col) === 1 && // Diagonal move
+        Math.abs(move.from.row - move.to.row) === 1 && // One square forward
+        prevMove &&
+        prevMove.piece.type === 'pawn' &&
+        Math.abs(prevMove.from.row - prevMove.to.row) === 2;
+
+      const isCastling =
+        move.piece.type === 'king' &&
+        Math.abs(move.to.col - move.from.col) === 2;
+
+      // Get the board state before this move
+      const prevBoard = getInitialBoard();
+      for (let i = 0; i < index; i++) {
+        const prevMove = moves[i];
+        prevBoard[prevMove.to.row][prevMove.to.col] = {
+          type: prevMove.piece.type,
+          color: prevMove.piece.color,
+        };
+        prevBoard[prevMove.from.row][prevMove.from.col] = null;
+      }
+
+      if (isCastling) {
+        playSound('castle');
+      } else if (isEnPassant || prevBoard[move.to.row][move.to.col] !== null) {
+        playSound('capture');
+      } else {
+        playSound('move');
+      }
+    }
+
     setCurrentMoveIndex(index);
 
     if (index === -1) {
@@ -116,28 +159,34 @@ export const useChessBoard = () => {
       setCurrentTurn('white');
       setIsInCheck(null);
       setIsGameOver(false);
+      setLastPawnMove(null);
       return;
     }
 
     // Replay moves up to the selected index
     const newBoard = getInitialBoard();
+    let lastPawn = null;
+
     for (let i = 0; i <= index; i++) {
       const move = moves[i];
       const isCastling =
         move.piece.type === 'king' &&
         Math.abs(move.to.col - move.from.col) === 2;
 
-      // If this is the move we're navigating to, play the appropriate sound
-      if (i === index && index !== currentMoveIndex) {
-        if (isCastling) {
-          playSound('castle');
-        } else if (newBoard[move.to.row][move.to.col] !== null) {
-          playSound('capture');
-        } else {
-          playSound('move');
-        }
-      }
+      // Check if this move is an en passant capture
+      const prevMove = i > 0 ? moves[i - 1] : null;
+      const isEnPassant =
+        move.piece.type === 'pawn' &&
+        Math.abs(move.from.col - move.to.col) === 1 && // Diagonal move
+        Math.abs(move.from.row - move.to.row) === 1 && // One square forward
+        !newBoard[move.to.row][move.to.col] && // No piece at target square
+        prevMove &&
+        prevMove.piece.type === 'pawn' &&
+        Math.abs(prevMove.from.row - prevMove.to.row) === 2 && // Previous move was a double pawn push
+        prevMove.to.col === move.to.col && // Same column as captured pawn
+        prevMove.to.row === move.from.row; // Same rank as capturing pawn
 
+      // Make the move
       newBoard[move.to.row][move.to.col] = {
         type: move.piece.type,
         color: move.piece.color,
@@ -152,9 +201,26 @@ export const useChessBoard = () => {
         newBoard[move.to.row][rookToCol] = newBoard[move.to.row][rookFromCol];
         newBoard[move.to.row][rookFromCol] = null;
       }
+
+      // Handle en passant capture
+      if (isEnPassant) {
+        newBoard[move.from.row][move.to.col] = null;
+      }
+
+      // Track last pawn move for en passant
+      if (
+        i === index &&
+        move.piece.type === 'pawn' &&
+        Math.abs(move.from.row - move.to.row) === 2
+      ) {
+        lastPawn = move;
+      }
     }
 
+    // Update all state at once
     setPieces(newBoard);
+    setLastPawnMove(lastPawn);
+
     // Set turn to opposite of last played move
     const lastMove = moves[index];
     setCurrentTurn(lastMove.piece.color === 'white' ? 'black' : 'white');
@@ -163,7 +229,6 @@ export const useChessBoard = () => {
     const opponentColor = lastMove.piece.color === 'white' ? 'black' : 'white';
     if (isKingInCheck(newBoard, opponentColor)) {
       setIsInCheck(opponentColor);
-      // Only set game over if this is the latest move
       if (isCheckmate(newBoard, opponentColor) && index === moves.length - 1) {
         setIsGameOver(true);
       }
@@ -211,8 +276,13 @@ export const useChessBoard = () => {
     // Handle en passant capture
     const isEnPassant =
       piece.type === 'pawn' &&
-      from.col !== to.col && // Diagonal move
-      !capturedPiece; // No piece at target square
+      Math.abs(from.col - to.col) === 1 && // Diagonal move
+      Math.abs(from.row - to.row) === 1 && // One square forward
+      !capturedPiece && // No piece at target square
+      lastPawnMove && // There was a previous pawn move
+      lastPawnMove.to.col === to.col && // Moving to the same column as the last pawn
+      lastPawnMove.to.row === from.row && // The enemy pawn is on the same rank
+      lastPawnMove.piece.color !== piece.color; // It was enemy's pawn
 
     if (isEnPassant) {
       // Remove the captured pawn
