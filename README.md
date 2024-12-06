@@ -18,12 +18,19 @@ This entire project, including all source code, components, and documentation, w
   - Valid move highlighting
   - Piece movement validation
   - Turn-based gameplay
+  - Legal move validation
+  - Checkmate detection
+  - En passant moves
+  - Castling moves
+  - Pawn promotion
+  - Check detection
 
 - **Advanced Game Analysis**
 
   - Material advantage calculation
   - Square domination analysis
   - Visual domination indicators on board
+  - Checkmate detection
 
 - **Interactive UI Elements**
 
@@ -32,12 +39,14 @@ This entire project, including all source code, components, and documentation, w
   - Move history with playback
   - Game status panel
   - Board coordinates (algebraic notation)
+  - Sound effects for moves, captures, and special events
 
 - **Visual Feedback**
   - Highlighted legal moves
   - Square domination overlay
   - Color-coded advantage indicators
   - Responsive design for various screen sizes
+  - Victory celebration effects
 
 ## 🛠 Technical Stack
 
@@ -114,11 +123,11 @@ src/
 
 ## 🎯 Future Enhancements
 
-- Legal move check
-- Checkmate detection
-- Stalemate detection
-- En passant moves
-- Castling moves
+- ~~Legal move check~~
+- ~~Checkmate detection~~
+- ~~Stalemate detection~~
+- ~~En passant moves~~
+- ~~Castling moves~~
 - Game save/load functionality
 - Computer opponent
 - Online multiplayer support

@@ -77,9 +77,10 @@ export const useChessBoard = () => {
   const [currentMoveIndex, setCurrentMoveIndex] = useState(-1);
   const [selectedPiece, setSelectedPiece] = useState<Position | null>(null);
   const [validMoves, setValidMoves] = useState<Position[]>([]);
+  const [lastPawnMove, setLastPawnMove] = useState<Move | null>(null);
   const { getValidMoves, isKingInCheck, isCheckmate } = useValidMoves(
     pieces,
-    null
+    lastPawnMove
   );
   const { playSound } = useChessSound();
   const [isInCheck, setIsInCheck] = useState<'white' | 'black' | null>(null);
@@ -207,6 +208,18 @@ export const useChessBoard = () => {
     const newPieces = pieces.map((row) => [...row]);
     const capturedPiece = newPieces[to.row][to.col];
 
+    // Handle en passant capture
+    const isEnPassant =
+      piece.type === 'pawn' &&
+      from.col !== to.col && // Diagonal move
+      !capturedPiece; // No piece at target square
+
+    if (isEnPassant) {
+      // Remove the captured pawn
+      newPieces[from.row][to.col] = null;
+      playSound('capture');
+    }
+
     // Set the piece, handling promotion if necessary
     newPieces[to.row][to.col] = isPromotion
       ? { type: promotionPiece!, color: piece.color }
@@ -266,6 +279,19 @@ export const useChessBoard = () => {
     setPromotionPending(null);
 
     setCurrentTurn(opponentColor);
+
+    if (piece.type === 'pawn' && Math.abs(from.row - to.row) === 2) {
+      setLastPawnMove({
+        from,
+        to,
+        piece: {
+          type: 'pawn',
+          color: piece.color,
+        },
+      });
+    } else {
+      setLastPawnMove(null);
+    }
   };
 
   const handleSquareClick = (row: number, col: number) => {
