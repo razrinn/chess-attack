@@ -108,8 +108,13 @@ export const useChessBoard = () => {
   const handleSquareClick = (row: number, col: number) => {
     if (selectedPiece) {
       if (selectedPiece.row === row && selectedPiece.col === col) {
+        // Clicking the same piece deselects it
         setSelectedPiece(null);
+      } else if (pieces[row][col]) {
+        // Clicking another piece changes selection to that piece
+        setSelectedPiece({ row, col });
       } else {
+        // Clicking an empty square attempts to make a move
         makeMove(selectedPiece, { row, col });
         setSelectedPiece(null);
       }
