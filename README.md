@@ -1,6 +1,6 @@
-# Chess Visualizer
+# Chess Attack
 
-This is a visualization of chess square domination using a fully functional chess game web application generated entirely through Large Language Model (LLM) interactions.
+This is a visualization of attacked chess square using a fully functional chess game web application generated entirely through Large Language Model (LLM) interactions.
 
 ## 🤖 LLM Attribution
 
