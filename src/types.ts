@@ -25,3 +25,12 @@ export interface Move {
   to: Position;
   piece: PieceState;
 }
+
+export type PieceType =
+  | 'pawn'
+  | 'rook'
+  | 'knight'
+  | 'bishop'
+  | 'queen'
+  | 'king';
+export type PieceColor = 'white' | 'black';
