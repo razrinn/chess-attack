@@ -9,6 +9,40 @@ import { useDomination } from '../hooks/useDomination';
 import { useDragAndDrop } from '../hooks/useDragAndDrop';
 import { WinningModal } from './WinningModal';
 import { PromotionModal } from './PromotionModal';
+import { PIECE_VALUES } from '../constants';
+import { PieceColor, PieceType } from '../types';
+
+const CapturedPieces: FC<{
+  pieces: {
+    type: PieceType;
+    color: PieceColor;
+  }[];
+  color: PieceColor;
+  isFlipped: boolean;
+}> = ({ pieces, color, isFlipped }) => {
+  const shouldReverse = (color === 'white') === isFlipped;
+
+  return (
+    <div
+      className={`flex items-center gap-1 p-2 min-h-[40px] ${
+        shouldReverse ? 'flex-row-reverse' : ''
+      }`}
+    >
+      <div
+        className={`w-4 h-4 ${
+          color === 'white' ? 'bg-blue-500/20' : 'bg-red-500/20'
+        } rounded-full`}
+      />
+      <div className='flex flex-wrap gap-1'>
+        {pieces.map((piece, index) => (
+          <div key={index} className='w-6 h-6'>
+            <Piece type={piece.type} color={piece.color} small />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 export const Board: FC = () => {
   const {
@@ -38,6 +72,41 @@ export const Board: FC = () => {
     validMoves
   );
 
+  const getCapturedPieces = () => {
+    const captured: {
+      white: { type: PieceType; color: PieceColor }[];
+      black: { type: PieceType; color: PieceColor }[];
+    } = {
+      white: [],
+      black: [],
+    };
+
+    moves.slice(0, currentMoveIndex + 1).forEach((move) => {
+      if (move.capturedPiece) {
+        if (move.capturedPiece.color === 'white') {
+          captured.black.push(move.capturedPiece);
+        } else {
+          captured.white.push(move.capturedPiece);
+        }
+      }
+    });
+
+    const sortPieces = (pieces: { type: PieceType; color: PieceColor }[]) => {
+      return pieces.sort(
+        (a, b) =>
+          PIECE_VALUES[b.type as keyof typeof PIECE_VALUES] -
+          PIECE_VALUES[a.type as keyof typeof PIECE_VALUES]
+      );
+    };
+
+    return {
+      white: sortPieces(captured.white),
+      black: sortPieces(captured.black),
+    };
+  };
+
+  const capturedPieces = getCapturedPieces();
+
   return (
     <>
       {promotionPending && (
@@ -50,6 +119,11 @@ export const Board: FC = () => {
       )}
       <div className='flex flex-col lg:flex-row gap-4'>
         <div className='flex flex-col gap-4'>
+          <CapturedPieces
+            pieces={capturedPieces[isFlipped ? 'white' : 'black']}
+            color={isFlipped ? 'white' : 'black'}
+            isFlipped={isFlipped}
+          />
           <Legend isFlipped={isFlipped}>
             <div className='inline-block border-2 border-gray-800 touch-none select-none'>
               {(isFlipped ? [...pieces].reverse() : pieces).map(
@@ -114,6 +188,11 @@ export const Board: FC = () => {
               )}
             </div>
           </Legend>
+          <CapturedPieces
+            pieces={capturedPieces[isFlipped ? 'black' : 'white']}
+            color={isFlipped ? 'black' : 'white'}
+            isFlipped={isFlipped}
+          />
         </div>
         <div className='flex flex-col gap-4 w-full lg:w-auto'>
           <div className='flex gap-2 justify-center lg:justify-start'>

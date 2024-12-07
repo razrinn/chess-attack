@@ -22,6 +22,10 @@ interface Move {
     type: PieceType;
     color: PieceColor;
   };
+  capturedPiece?: {
+    type: PieceType;
+    color: PieceColor;
+  };
 }
 
 const getInitialBoard = () => {
@@ -272,24 +276,25 @@ export const useChessBoard = () => {
     }
 
     const newPieces = pieces.map((row) => [...row]);
-    const capturedPiece = newPieces[to.row][to.col];
 
     // Handle en passant capture
     const isEnPassant =
       piece.type === 'pawn' &&
       Math.abs(from.col - to.col) === 1 && // Diagonal move
       Math.abs(from.row - to.row) === 1 && // One square forward
-      !capturedPiece && // No piece at target square
       lastPawnMove && // There was a previous pawn move
       lastPawnMove.to.col === to.col && // Moving to the same column as the last pawn
       lastPawnMove.to.row === from.row && // The enemy pawn is on the same rank
       lastPawnMove.piece.color !== piece.color; // It was enemy's pawn
 
-    if (isEnPassant) {
-      // Remove the captured pawn
-      newPieces[from.row][to.col] = null;
-      playSound('capture');
-    }
+    const capturedPiece: PieceState | undefined =
+      newPieces[to.row][to.col] ||
+      (isEnPassant
+        ? {
+            type: 'pawn' as const,
+            color: piece.color === 'white' ? 'black' : 'white',
+          }
+        : undefined);
 
     // Set the piece, handling promotion if necessary
     newPieces[to.row][to.col] = isPromotion
@@ -323,6 +328,7 @@ export const useChessBoard = () => {
         type: isPromotion ? promotionPiece! : piece.type,
         color: piece.color,
       },
+      capturedPiece,
     });
 
     // Check for check condition before updating state

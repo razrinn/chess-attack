@@ -1,9 +1,10 @@
 import { FC } from 'react';
-import { PieceType } from '../types';
+import { PieceColor, PieceType } from '../types';
+import { PIECE_VALUES } from '../constants';
 
 interface PieceCount {
-  type: 'pawn' | 'rook' | 'knight' | 'bishop' | 'queen' | 'king';
-  color: 'white' | 'black';
+  type: PieceType;
+  color: PieceColor;
 }
 
 interface DominationCount {
@@ -16,19 +17,10 @@ interface DominationCount {
 interface GameStatusProps {
   pieces: (PieceCount | null)[][];
   domination: DominationCount[][];
-  isInCheck: 'white' | 'black' | null;
+  isInCheck: PieceColor | null;
   isGameOver: boolean;
-  currentTurn: 'white' | 'black';
+  currentTurn: PieceColor;
 }
-
-const PIECE_VALUES = {
-  pawn: 1,
-  bishop: 3,
-  knight: 3,
-  rook: 5,
-  queen: 9,
-  king: 0, // Not counted in material advantage
-};
 
 // Weight for square control in the overall advantage calculation
 const SQUARE_CONTROL_WEIGHT = 0.1;
@@ -40,7 +32,7 @@ export const GameStatus: FC<GameStatusProps> = ({
   isGameOver,
   currentTurn,
 }) => {
-  const calculateMaterialValue = (color: 'white' | 'black') => {
+  const calculateMaterialValue = (color: PieceColor) => {
     let value = 0;
     pieces.forEach((row) => {
       row.forEach((piece) => {
@@ -52,7 +44,7 @@ export const GameStatus: FC<GameStatusProps> = ({
     return value;
   };
 
-  const calculateTotalDomination = (color: 'white' | 'black') => {
+  const calculateTotalDomination = (color: PieceColor) => {
     let total = 0;
     let totalValue = 0;
     domination.forEach((row) => {

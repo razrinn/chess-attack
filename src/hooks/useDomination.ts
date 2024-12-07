@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { PieceColor, PieceType } from '../types';
+import { PIECE_VALUES } from '../constants';
 
 interface PieceState {
   type: PieceType;
@@ -12,15 +13,6 @@ interface DominationCount {
   whitePieces: { type: PieceType; value: number }[];
   blackPieces: { type: PieceType; value: number }[];
 }
-
-const PIECE_VALUES = {
-  pawn: 1,
-  bishop: 3,
-  knight: 3,
-  rook: 5,
-  queen: 9,
-  king: 0,
-};
 
 export const useDomination = (pieces: (PieceState | null)[][]) => {
   const [domination, setDomination] = useState<DominationCount[][]>(() =>

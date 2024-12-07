@@ -1,11 +1,16 @@
 import { FC, useEffect, useRef, useMemo } from 'react';
+import { PieceColor, PieceType } from '../types';
 
 interface Move {
   from: { row: number; col: number };
   to: { row: number; col: number };
   piece: {
-    type: 'pawn' | 'rook' | 'knight' | 'bishop' | 'queen' | 'king';
-    color: 'white' | 'black';
+    type: PieceType;
+    color: PieceColor;
+  };
+  capturedPiece?: {
+    type: PieceType;
+    color: PieceColor;
   };
 }
 
@@ -132,6 +137,7 @@ export const MoveHistory: FC<MoveHistoryProps> = ({
       <h2 className='text-lg font-bold mb-4 text-center lg:text-left'>
         Move History
       </h2>
+
       <div className='flex gap-2 mb-4 justify-center lg:justify-start flex-wrap'>
         <button
           className='px-3 py-1 bg-gray-700 rounded hover:bg-gray-600 disabled:opacity-50 text-gray-200'
