@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import { Square } from './Square';
 import { Piece } from './Piece';
 import { MoveHistory } from './MoveHistory';
@@ -28,6 +28,8 @@ export const Board: FC = () => {
     isFlipped,
     setIsFlipped,
   } = useChessBoard();
+
+  const [showHints, setShowHints] = useState(true);
 
   const { domination, getDominationStyle } = useDomination(pieces);
 
@@ -71,12 +73,20 @@ export const Board: FC = () => {
                             onClick={() =>
                               handleSquareClick(actualRow, actualCol)
                             }
-                            dominationCount={domination[actualRow][actualCol]}
+                            dominationCount={
+                              showHints
+                                ? domination[actualRow][actualCol]
+                                : undefined
+                            }
                           >
                             <div
-                              className={`relative w-full h-full flex items-center justify-center cursor-pointer ${getDominationStyle(
-                                domination[actualRow][actualCol]
-                              )} ${getSquareHighlight(actualRow, actualCol)}`}
+                              className={`relative w-full h-full flex items-center justify-center cursor-pointer ${
+                                showHints
+                                  ? getDominationStyle(
+                                      domination[actualRow][actualCol]
+                                    )
+                                  : ''
+                              } ${getSquareHighlight(actualRow, actualCol)}`}
                               onClick={() =>
                                 handleSquareClick(actualRow, actualCol)
                               }
@@ -112,6 +122,13 @@ export const Board: FC = () => {
               className='p-1 px-2 bg-gray-700 rounded hover:bg-gray-600 text-gray-200 flex items-center gap-2'
             >
               🔄
+            </button>
+            <button
+              onClick={() => setShowHints((prev) => !prev)}
+              className='p-1 px-2 bg-gray-700 rounded hover:bg-gray-600 text-gray-200 flex items-center gap-2'
+              title='Toggle Hints'
+            >
+              {showHints ? '💡' : '🔌'}
             </button>
           </div>
           <GameStatus

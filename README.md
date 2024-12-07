@@ -1,6 +1,6 @@
 # Chess Attack
 
-This is a visualization of attacked chess square using a fully functional chess game web application generated entirely through Large Language Model (LLM) interactions.
+This is a visualization of attacked chess squares using a fully functional chess game web application generated entirely through Large Language Model (LLM) interactions.
 
 ## 🤖 LLM Attribution
 
@@ -30,17 +30,20 @@ This entire project, including all source code, components, and documentation, w
   - Material advantage calculation
   - Square domination analysis
   - Visual domination indicators on board
-  - Checkmate detection
+  - Piece-specific attack value calculation
+  - Weighted domination scoring
 
 - **Interactive UI Elements**
 
   - Drag and drop piece movement
   - Click-to-move alternative
-  - Move history with playback
-  - Game status panel
+  - Move history with PGN notation
+  - Game status panel with advantage indicators
   - Board coordinates (algebraic notation)
   - Board flipping for different perspectives
   - Sound effects for moves, captures, and special events
+  - Keyboard controls for move navigation
+  - Toggleable attack indicators
 
 - **Visual Feedback**
   - Highlighted legal moves
@@ -48,6 +51,8 @@ This entire project, including all source code, components, and documentation, w
   - Color-coded advantage indicators
   - Responsive design for various screen sizes
   - Victory celebration effects
+  - Piece attack tooltips
+  - Material advantage display
 
 ## 🛠 Technical Stack
 
@@ -56,6 +61,8 @@ This entire project, including all source code, components, and documentation, w
 - **Styling**: Tailwind CSS
 - **State Management**: React Hooks
 - **Development Tools**: ESLint, TypeScript ESLint
+- **Audio**: Web Audio API
+- **Animation**: Canvas Confetti
 
 ## 🚀 Getting Started
 
@@ -119,7 +126,7 @@ src/
 │   ├── useChessBoard.ts    # Game logic
 │   ├── useDomination.ts    # Square control
 │   └── useDragAndDrop.ts   # Drag-n-drop
-└── ...
+├── ...
 ```
 
 ## 🎯 Future Enhancements

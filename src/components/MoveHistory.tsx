@@ -164,7 +164,7 @@ export const MoveHistory: FC<MoveHistoryProps> = ({
       </div>
       <div
         ref={movesContainerRef}
-        className='max-h-36 lg:max-h-48 overflow-y-auto scroll-smooth'
+        className='max-h-36 lg:max-h-44 overflow-y-scroll scroll-smooth'
       >
         {movePairs.map(({ number, white, black }, index) => (
           <div key={number} className='py-1 flex gap-2'>

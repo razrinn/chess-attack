@@ -194,7 +194,7 @@ export const GameStatus: FC<GameStatusProps> = ({
         </div>
 
         {/* Check/Checkmate status and Turn indicator */}
-        <div className='h-8 flex items-center justify-center'>
+        <div className='h-8 flex items-center'>
           {/* Turn indicator */}
           <div
             className={`font-bold text-center text-sm transition-opacity duration-300 ${
