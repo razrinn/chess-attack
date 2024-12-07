@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import { PieceType } from '../types';
 
 interface PieceCount {
   type: 'pawn' | 'rook' | 'knight' | 'bishop' | 'queen' | 'king';
@@ -8,6 +9,8 @@ interface PieceCount {
 interface DominationCount {
   white: number;
   black: number;
+  whitePieces: { type: PieceType; value: number }[];
+  blackPieces: { type: PieceType; value: number }[];
 }
 
 interface GameStatusProps {
@@ -15,6 +18,7 @@ interface GameStatusProps {
   domination: DominationCount[][];
   isInCheck: 'white' | 'black' | null;
   isGameOver: boolean;
+  currentTurn: 'white' | 'black';
 }
 
 const PIECE_VALUES = {
@@ -34,6 +38,7 @@ export const GameStatus: FC<GameStatusProps> = ({
   domination,
   isInCheck,
   isGameOver,
+  currentTurn,
 }) => {
   const calculateMaterialValue = (color: 'white' | 'black') => {
     let value = 0;
@@ -49,12 +54,17 @@ export const GameStatus: FC<GameStatusProps> = ({
 
   const calculateTotalDomination = (color: 'white' | 'black') => {
     let total = 0;
+    let totalValue = 0;
     domination.forEach((row) => {
       row.forEach((square) => {
         total += square[color];
+        totalValue += square[`${color}Pieces`].reduce(
+          (sum, p) => sum + p.value,
+          0
+        );
       });
     });
-    return total;
+    return { count: total, value: totalValue };
   };
 
   const whiteValue = calculateMaterialValue('white');
@@ -62,11 +72,35 @@ export const GameStatus: FC<GameStatusProps> = ({
   const whiteDomination = calculateTotalDomination('white');
   const blackDomination = calculateTotalDomination('black');
 
-  // Calculate advantages (positive means White is ahead, negative means Black is ahead)
+  // Calculate advantages
   const materialAdvantage = whiteValue - blackValue;
-  const dominationAdvantage = whiteDomination - blackDomination;
+  const dominationCountAdvantage =
+    whiteDomination.count - blackDomination.count;
+  const dominationValueAdvantage =
+    whiteDomination.value - blackDomination.value;
+
+  // Calculate weighted domination advantage based on material difference
+  const materialDifference = Math.abs(materialAdvantage);
+  const isWhiteWeaker = materialAdvantage < 0;
+  const isBlackWeaker = materialAdvantage > 0;
+
+  // Increase the weight of domination for the materially weaker side
+  const dominationWeight =
+    SQUARE_CONTROL_WEIGHT * (1 + materialDifference * 0.1);
+
+  // Apply the weighted domination advantage
+  const weightedDominationAdvantage =
+    (isWhiteWeaker
+      ? dominationCountAdvantage * dominationWeight
+      : dominationCountAdvantage * SQUARE_CONTROL_WEIGHT) +
+    (isBlackWeaker
+      ? -dominationCountAdvantage * dominationWeight
+      : -dominationCountAdvantage * SQUARE_CONTROL_WEIGHT);
+
   const overallAdvantage =
-    materialAdvantage + dominationAdvantage * SQUARE_CONTROL_WEIGHT;
+    materialAdvantage +
+    weightedDominationAdvantage +
+    dominationValueAdvantage * SQUARE_CONTROL_WEIGHT * 0.1;
 
   // Helper function to format advantage text with proper sign
   const formatAdvantage = (value: number) => {
@@ -132,14 +166,14 @@ export const GameStatus: FC<GameStatusProps> = ({
           <div className='text-center'>
             <div
               className={`font-semibold ${
-                dominationAdvantage > 0
+                dominationCountAdvantage > 0
                   ? 'text-blue-400'
-                  : dominationAdvantage < 0
+                  : dominationCountAdvantage < 0
                   ? 'text-red-400'
                   : 'text-gray-400'
               }`}
             >
-              {formatAdvantage(dominationAdvantage)}
+              {formatAdvantage(dominationCountAdvantage)}
             </div>
             <div className='text-xs text-gray-400'>Control</div>
           </div>
@@ -159,18 +193,31 @@ export const GameStatus: FC<GameStatusProps> = ({
           </div>
         </div>
 
-        {/* Check/Checkmate status */}
-        {isInCheck && (
+        {/* Check/Checkmate status and Turn indicator */}
+        <div className='h-8 flex items-center justify-center'>
+          {/* Turn indicator */}
           <div
-            className={`text-${
-              isInCheck === 'white' ? 'blue' : 'red'
-            }-500 font-bold mt-2 text-center`}
+            className={`font-bold text-center text-sm transition-opacity duration-300 ${
+              !isInCheck ? 'opacity-100' : 'opacity-40'
+            } ${currentTurn === 'white' ? 'text-blue-500' : 'text-red-500'}`}
           >
-            {isInCheck.charAt(0).toUpperCase() + isInCheck.slice(1)} is in
-            check!
-            {isGameOver && ' - Checkmate!'}
+            {currentTurn.charAt(0).toUpperCase() + currentTurn.slice(1)}'s turn
           </div>
-        )}
+
+          {/* Check/Checkmate status */}
+          <div
+            className={`font-bold text-center text-sm transition-opacity duration-300 ml-2 ${
+              isInCheck ? 'opacity-100' : 'opacity-0'
+            } ${isInCheck === 'white' ? 'text-blue-500' : 'text-red-500'}`}
+          >
+            {isInCheck && (
+              <>
+                They're in a check!
+                {isGameOver && ' - Checkmate!'}
+              </>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

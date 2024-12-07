@@ -365,9 +365,6 @@ export const useValidMoves = (
       });
     }
 
-    // Rest of the existing pin detection logic
-    // Reference to existing code:
-
     return moves;
   };
 

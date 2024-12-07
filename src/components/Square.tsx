@@ -42,27 +42,30 @@ export const Square: FC<SquareProps> = ({
       0
     );
 
+    // Group pieces by type and count
+    const groupPieces = (pieces: { type: PieceType; value: number }[]) => {
+      const grouped = pieces.reduce((acc, piece) => {
+        acc[piece.type] = (acc[piece.type] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+      return Object.entries(grouped)
+        .map(([type, count]) => `${count}${type.charAt(0).toUpperCase()}`)
+        .join(' ');
+    };
+
     return (
       <div className='fixed top-20 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs p-2 rounded shadow-lg pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity z-50 whitespace-nowrap'>
         {dominationCount.whitePieces.length > 0 && (
           <div className='mb-1'>
-            <span className='text-blue-400'>White</span> ({totalWhiteValue}{' '}
-            pts):
-            {dominationCount.whitePieces.map((p, i) => (
-              <span key={i} className='ml-1'>
-                {p.type}({p.value})
-              </span>
-            ))}
+            <span className='text-blue-400'>White</span> ({totalWhiteValue}):{' '}
+            {groupPieces(dominationCount.whitePieces)}
           </div>
         )}
         {dominationCount.blackPieces.length > 0 && (
           <div>
-            <span className='text-red-400'>Black</span> ({totalBlackValue} pts):
-            {dominationCount.blackPieces.map((p, i) => (
-              <span key={i} className='ml-1'>
-                {p.type}({p.value})
-              </span>
-            ))}
+            <span className='text-red-400'>Black</span> ({totalBlackValue}):{' '}
+            {groupPieces(dominationCount.blackPieces)}
           </div>
         )}
       </div>

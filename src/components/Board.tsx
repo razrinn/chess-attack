@@ -119,6 +119,7 @@ export const Board: FC = () => {
             domination={domination}
             isInCheck={isInCheck}
             isGameOver={isGameOver}
+            currentTurn={currentTurn}
           />
           <MoveHistory
             moves={moves}
