@@ -129,9 +129,7 @@ src/
 - ~~Stalemate detection~~
 - ~~En passant moves~~
 - ~~Castling moves~~
-- Game save/load functionality
-- Computer opponent
-- Online multiplayer support
+- Game export/import functionality
 
 ## 📝 License
 
