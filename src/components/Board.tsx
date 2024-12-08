@@ -24,7 +24,7 @@ const CapturedPieces: FC<{
 
   return (
     <div
-      className={`flex items-center gap-1 p-2 min-h-[40px] ${
+      className={`flex items-center gap-1 min-h-[40px] ${
         shouldReverse ? 'flex-row-reverse' : ''
       }`}
     >
@@ -118,7 +118,7 @@ export const Board: FC = () => {
         />
       )}
       <div className='flex flex-col lg:flex-row gap-4'>
-        <div className='flex flex-col gap-4'>
+        <div className='flex flex-col gap-1'>
           <CapturedPieces
             pieces={capturedPieces[isFlipped ? 'white' : 'black']}
             color={isFlipped ? 'white' : 'black'}
