@@ -253,6 +253,8 @@ export const useValidMoves = (
         break;
     }
 
+    if (piece.type === 'king') console.log(moves);
+
     const kingPosition = findKing(pieces, piece.color);
     if (!kingPosition) return moves;
 
@@ -434,27 +436,69 @@ export const useValidMoves = (
               if (!blocked) return true;
             }
           } else {
-            // For non-sliding pieces (pawn, knight, king), use the existing move calculation
-            let moves: Position[] = [];
+            // For non-sliding pieces, check their specific attack patterns
             switch (piece.type) {
-              case 'pawn':
-                moves = getPawnMoves(row, col, piece.color);
+              case 'pawn': {
+                const direction = piece.color === 'white' ? -1 : 1;
+                const attackSquares = [
+                  { row: row + direction, col: col - 1 },
+                  { row: row + direction, col: col + 1 },
+                ];
+                if (
+                  attackSquares.some(
+                    (square) =>
+                      square.row === kingPosition.row &&
+                      square.col === kingPosition.col
+                  )
+                ) {
+                  return true;
+                }
                 break;
-              case 'knight':
-                moves = getKnightMoves(row, col, piece.color);
+              }
+              case 'knight': {
+                const knightMoves = [
+                  [-2, -1],
+                  [-2, 1],
+                  [-1, -2],
+                  [-1, 2],
+                  [1, -2],
+                  [1, 2],
+                  [2, -1],
+                  [2, 1],
+                ];
+                if (
+                  knightMoves.some(
+                    ([dRow, dCol]) =>
+                      row + dRow === kingPosition.row &&
+                      col + dCol === kingPosition.col
+                  )
+                ) {
+                  return true;
+                }
                 break;
-              case 'king':
-                moves = getKingMoves(row, col, piece.color);
+              }
+              case 'king': {
+                const kingMoves = [
+                  [-1, -1],
+                  [-1, 0],
+                  [-1, 1],
+                  [0, -1],
+                  [0, 1],
+                  [1, -1],
+                  [1, 0],
+                  [1, 1],
+                ];
+                if (
+                  kingMoves.some(
+                    ([dRow, dCol]) =>
+                      row + dRow === kingPosition.row &&
+                      col + dCol === kingPosition.col
+                  )
+                ) {
+                  return true;
+                }
                 break;
-            }
-
-            if (
-              moves.some(
-                (move) =>
-                  move.row === kingPosition.row && move.col === kingPosition.col
-              )
-            ) {
-              return true;
+              }
             }
           }
         }
