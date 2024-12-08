@@ -73,21 +73,16 @@ export const Square: FC<SquareProps> = ({
   };
 
   const getDominationIndicator = () => {
-    if (
-      !dominationCount ||
-      (dominationCount.white === 0 && dominationCount.black === 0)
-    ) {
-      return null;
-    }
+    if (!dominationCount) return null;
 
-    // Determine which color dominates
-    const whiteDominates = dominationCount.white > dominationCount.black;
-    const blackDominates = dominationCount.black > dominationCount.white;
-    const isContested = dominationCount.white === dominationCount.black;
+    const showWhite = dominationCount.white > 0;
+    const showBlack = dominationCount.black > 0;
+
+    if (!showWhite && !showBlack) return null;
 
     return (
       <div className='absolute bottom-0.5 right-0.5 flex items-center gap-0.5'>
-        {(whiteDominates || isContested) && (
+        {showWhite && (
           <div className='flex items-center'>
             <div className='w-1.5 h-1.5 rounded-full bg-blue-400/70' />
             <span className='text-[8px] font-semibold text-blue-400/70 ml-0.5'>
@@ -95,8 +90,10 @@ export const Square: FC<SquareProps> = ({
             </span>
           </div>
         )}
-        {isContested && <span className='text-[8px] text-gray-400'>·</span>}
-        {(blackDominates || isContested) && (
+        {showWhite && showBlack && (
+          <span className='text-[8px] text-gray-400'>·</span>
+        )}
+        {showBlack && (
           <div className='flex items-center'>
             <div className='w-1.5 h-1.5 rounded-full bg-red-400/70' />
             <span className='text-[8px] font-semibold text-red-400/70 ml-0.5'>

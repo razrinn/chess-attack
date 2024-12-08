@@ -148,6 +148,7 @@ For detailed guidelines, please see [CONTRIBUTING.md](CONTRIBUTING.md)
 - ~~Stalemate detection~~
 - ~~En passant moves~~
 - ~~Castling moves~~
+- ~~Pawn promotion~~
 - Game export/import functionality
 
 ## 📝 License
