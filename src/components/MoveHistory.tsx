@@ -1,19 +1,6 @@
 import { FC, useEffect, useRef, useMemo } from 'react';
-import { PieceColor, PieceType } from '../types';
-
-interface Move {
-  from: { row: number; col: number };
-  to: { row: number; col: number };
-  piece: {
-    type: PieceType;
-    color: PieceColor;
-  };
-  capturedPiece?: {
-    type: PieceType;
-    color: PieceColor;
-  };
-}
-
+import { Move } from '../types';
+import { getPieceLetter } from '../utils/pgn';
 interface MoveHistoryProps {
   moves: Move[];
   currentMove: number;
@@ -32,15 +19,6 @@ export const MoveHistory: FC<MoveHistoryProps> = ({
   };
 
   const getPGNNotation = (move: Move, index: number) => {
-    const pieceSymbols: Record<string, string> = {
-      king: 'K',
-      queen: 'Q',
-      rook: 'R',
-      bishop: 'B',
-      knight: 'N',
-      pawn: '',
-    };
-
     // Handle castling
     if (
       move.piece.type === 'king' &&
@@ -53,7 +31,7 @@ export const MoveHistory: FC<MoveHistoryProps> = ({
 
     // Add piece symbol (except for pawns)
     if (move.piece.type !== 'pawn') {
-      notation += pieceSymbols[move.piece.type];
+      notation += getPieceLetter(move.piece.type);
     }
 
     // For pawns, add file if it's a capture

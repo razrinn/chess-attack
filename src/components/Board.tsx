@@ -11,6 +11,8 @@ import { WinningModal } from './WinningModal';
 import { PromotionModal } from './PromotionModal';
 import { PIECE_VALUES } from '../constants';
 import { PieceColor, PieceType } from '../types';
+import { generatePGN } from '../utils/pgn';
+import { PGNModal } from './PGNModal';
 
 const CapturedPieces: FC<{
   pieces: {
@@ -64,6 +66,8 @@ export const Board: FC = () => {
   } = useChessBoard();
 
   const [showHints, setShowHints] = useState(true);
+  const [showPGNModal, setShowPGNModal] = useState(false);
+  const [showWinningModal, setShowWinningModal] = useState(true);
 
   const { domination, getDominationStyle } = useDomination(pieces);
 
@@ -209,6 +213,13 @@ export const Board: FC = () => {
             >
               {showHints ? '💡' : '🔌'}
             </button>
+            <button
+              onClick={() => setShowPGNModal(true)}
+              className='p-1 px-2 bg-gray-700 rounded hover:bg-gray-600 text-gray-200 flex items-center gap-2'
+              title='Export PGN'
+            >
+              📥
+            </button>
           </div>
           <GameStatus
             pieces={pieces}
@@ -224,10 +235,29 @@ export const Board: FC = () => {
           />
         </div>
       </div>
-      {isGameOver && (
+      {isGameOver && showWinningModal && (
         <WinningModal
           winner={currentTurn === 'white' ? 'black' : 'white'}
           onRestart={resetGame}
+          onClose={() => setShowWinningModal(false)}
+        />
+      )}
+      {showPGNModal && (
+        <PGNModal
+          pgn={generatePGN(moves)}
+          onClose={() => setShowPGNModal(false)}
+          onDownload={() => {
+            const pgn = generatePGN(moves);
+            const blob = new Blob([pgn], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'game.pgn';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+          }}
         />
       )}
     </>

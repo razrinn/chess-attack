@@ -21,9 +21,16 @@ export interface GameState {
 }
 
 export interface Move {
-  from: Position;
-  to: Position;
-  piece: PieceState;
+  from: { row: number; col: number };
+  to: { row: number; col: number };
+  piece: {
+    type: PieceType;
+    color: PieceColor;
+  };
+  capturedPiece?: {
+    type: PieceType;
+    color: PieceColor;
+  };
 }
 
 export type PieceType =

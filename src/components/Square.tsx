@@ -1,5 +1,6 @@
 import { FC, ReactNode } from 'react';
 import { PieceType } from '../types';
+import { getPieceLetter } from '../utils/pgn';
 
 interface SquareProps {
   isBlack: boolean;
@@ -50,7 +51,10 @@ export const Square: FC<SquareProps> = ({
       }, {} as Record<string, number>);
 
       return Object.entries(grouped)
-        .map(([type, count]) => `${count}${type.charAt(0).toUpperCase()}`)
+        .map(
+          ([type, count]) =>
+            `${count}${getPieceLetter(type as PieceType) || 'P'}`
+        )
         .join(' ');
     };
 
