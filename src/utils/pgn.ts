@@ -54,6 +54,9 @@ export const generatePGN = (moves: Move[]): string => {
       whiteMove.piece.type === 'pawn' && whiteCapture
         ? getSquareName(whiteMove.from.row, whiteMove.from.col)[0]
         : '';
+    const whitePromotion = whiteMove.promotion
+      ? `=${getPieceLetter(whiteMove.promotion)}`
+      : '';
 
     // Handle castling for white
     if (
@@ -63,7 +66,7 @@ export const generatePGN = (moves: Move[]): string => {
       pairNotation +=
         ' ' + (whiteMove.to.col > whiteMove.from.col ? 'O-O' : 'O-O-O');
     } else {
-      pairNotation += ` ${whitePieceLetter}${whitePawnCapture}${whiteCapture}${whiteDestination}`;
+      pairNotation += ` ${whitePieceLetter}${whitePawnCapture}${whiteCapture}${whiteDestination}${whitePromotion}`;
     }
 
     // Add black's move if it exists
@@ -78,6 +81,9 @@ export const generatePGN = (moves: Move[]): string => {
         blackMove.piece.type === 'pawn' && blackCapture
           ? getSquareName(blackMove.from.row, blackMove.from.col)[0]
           : '';
+      const blackPromotion = blackMove.promotion
+        ? `=${getPieceLetter(blackMove.promotion)}`
+        : '';
 
       // Handle castling for black
       if (
@@ -87,7 +93,7 @@ export const generatePGN = (moves: Move[]): string => {
         pairNotation +=
           ' ' + (blackMove.to.col > blackMove.from.col ? 'O-O' : 'O-O-O');
       } else {
-        pairNotation += ` ${blackPieceLetter}${blackPawnCapture}${blackCapture}${blackDestination}`;
+        pairNotation += ` ${blackPieceLetter}${blackPawnCapture}${blackCapture}${blackDestination}${blackPromotion}`;
       }
     }
 

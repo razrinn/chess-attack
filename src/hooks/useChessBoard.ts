@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useValidMoves } from './useValidMoves';
 import { useChessSound } from './useChessSound';
+import { Position } from '../types';
 
 type PieceType = 'pawn' | 'rook' | 'knight' | 'bishop' | 'queen' | 'king';
 type PieceColor = 'white' | 'black';
@@ -8,11 +9,6 @@ type PieceColor = 'white' | 'black';
 interface PieceState {
   type: PieceType;
   color: PieceColor;
-}
-
-interface Position {
-  row: number;
-  col: number;
 }
 
 interface Move {
@@ -26,6 +22,7 @@ interface Move {
     type: PieceType;
     color: PieceColor;
   };
+  promotion?: PieceType;
 }
 
 const getInitialBoard = () => {
@@ -325,10 +322,11 @@ export const useChessBoard = () => {
       from,
       to,
       piece: {
-        type: isPromotion ? promotionPiece! : piece.type,
+        type: piece.type,
         color: piece.color,
       },
       capturedPiece,
+      ...(isPromotion && { promotion: promotionPiece }),
     });
 
     // Check for check condition before updating state
@@ -415,6 +413,71 @@ export const useChessBoard = () => {
     return '';
   };
 
+  const importGame = (moves: Move[]) => {
+    resetGame();
+
+    // Create a new board to track state
+    const currentBoard = getInitialBoard();
+    let currentTurnColor: PieceColor = 'white';
+    let currentLastPawnMove: Move | null = null;
+
+    // Apply each move sequentially
+    moves.forEach((move) => {
+      // Update the board state
+      currentBoard[move.to.row][move.to.col] = {
+        type: move.promotion || move.piece.type,
+        color: move.piece.color,
+      };
+      currentBoard[move.from.row][move.from.col] = null;
+
+      // Handle special cases
+      if (
+        move.piece.type === 'king' &&
+        Math.abs(move.to.col - move.from.col) === 2
+      ) {
+        // Castling - move rook
+        const isKingside = move.to.col > move.from.col;
+        const row = move.piece.color === 'white' ? 7 : 0;
+        const rookFromCol = isKingside ? 7 : 0;
+        const rookToCol = isKingside ? 5 : 3;
+        currentBoard[row][rookToCol] = {
+          type: 'rook',
+          color: move.piece.color,
+        };
+        currentBoard[row][rookFromCol] = null;
+      } else if (
+        move.piece.type === 'pawn' &&
+        move.capturedPiece &&
+        !currentBoard[move.to.row][move.to.col]
+      ) {
+        // En passant capture
+        const captureRow = move.from.row;
+        currentBoard[captureRow][move.to.col] = null;
+      }
+
+      // Track last pawn move for en passant
+      if (
+        move.piece.type === 'pawn' &&
+        Math.abs(move.from.row - move.to.row) === 2
+      ) {
+        currentLastPawnMove = move;
+      } else {
+        currentLastPawnMove = null;
+      }
+
+      // Update the actual board state
+      setPieces(currentBoard.map((row) => [...row]));
+      setLastPawnMove(currentLastPawnMove);
+
+      // Add move to history
+      setMoves((prevMoves) => [...prevMoves, move]);
+      setCurrentMoveIndex((prevIndex) => prevIndex + 1);
+
+      // Switch turns
+      currentTurnColor = currentTurnColor === 'white' ? 'black' : 'white';
+    });
+  };
+
   return {
     pieces,
     moves,
@@ -432,5 +495,6 @@ export const useChessBoard = () => {
     promotionPending,
     isFlipped,
     setIsFlipped,
+    importGame,
   };
 };

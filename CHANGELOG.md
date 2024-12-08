@@ -24,6 +24,7 @@ All notable changes to Chess Attack will be documented in this file.
   - ✅ Visual domination indicators
   - ✅ Piece-specific attack value calculation
   - ✅ Weighted domination scoring
+  - ✅ PGN import/export
 
 - User Interface
   - ✅ Drag and drop piece movement
@@ -41,13 +42,10 @@ All notable changes to Chess Attack will be documented in this file.
 
 ### Pending Features
 
-- [ ] Game export/import functionality
 - [ ] Time controls
 - [ ] Opening book integration
 - [ ] Position evaluation
 - [ ] Game analysis engine
-- [ ] Multiplayer support
-- [ ] Game save/load
 - [ ] Move annotations
 - [ ] Custom board themes
 - [ ] Accessibility improvements

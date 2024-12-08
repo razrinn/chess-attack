@@ -13,6 +13,7 @@ import { PIECE_VALUES } from '../constants';
 import { PieceColor, PieceType } from '../types';
 import { generatePGN } from '../utils/pgn';
 import { PGNModal } from './PGNModal';
+import { PGNImportModal } from './PGNImportModal';
 
 const CapturedPieces: FC<{
   pieces: {
@@ -63,12 +64,13 @@ export const Board: FC = () => {
     promotionPending,
     isFlipped,
     setIsFlipped,
+    importGame,
   } = useChessBoard();
 
   const [showHints, setShowHints] = useState(true);
   const [showPGNModal, setShowPGNModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [showWinningModal, setShowWinningModal] = useState(true);
-
   const { domination, getDominationStyle } = useDomination(pieces);
 
   const { handleDragStart, handleDragOver, handleDrop } = useDragAndDrop(
@@ -218,6 +220,13 @@ export const Board: FC = () => {
               className='p-1 px-2 bg-gray-700 rounded hover:bg-gray-600 text-gray-200 flex items-center gap-2'
               title='Export PGN'
             >
+              📤
+            </button>
+            <button
+              onClick={() => setShowImportModal(true)}
+              className='p-1 px-2 bg-gray-700 rounded hover:bg-gray-600 text-gray-200 flex items-center gap-2'
+              title='Import PGN'
+            >
               📥
             </button>
           </div>
@@ -257,6 +266,15 @@ export const Board: FC = () => {
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+          }}
+        />
+      )}
+      {showImportModal && (
+        <PGNImportModal
+          onClose={() => setShowImportModal(false)}
+          onImport={(moves) => {
+            importGame(moves);
+            setShowImportModal(false);
           }}
         />
       )}

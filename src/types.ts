@@ -21,8 +21,8 @@ export interface GameState {
 }
 
 export interface Move {
-  from: { row: number; col: number };
-  to: { row: number; col: number };
+  from: Position;
+  to: Position;
   piece: {
     type: PieceType;
     color: PieceColor;
@@ -31,6 +31,7 @@ export interface Move {
     type: PieceType;
     color: PieceColor;
   };
+  promotion?: PieceType;
 }
 
 export type PieceType =
